@@ -17,6 +17,7 @@ import io
 import json
 import os
 import re
+from pathlib import Path
 from typing import List, Optional
 
 import torch
@@ -25,6 +26,7 @@ from transformers import AutoProcessor, AutoModelForImageTextToText
 from transformers import logging as hf_logging
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 from openai import OpenAI, OpenAIError
 from pydantic import BaseModel
 
@@ -117,6 +119,8 @@ RECIPE_RESPONSE_SCHEMA = {
     },
     "required": ["recipes"],
 }
+
+load_dotenv(Path(__file__).with_name(".env"))
 
 recipe_client = None
 
