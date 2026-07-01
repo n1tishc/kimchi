@@ -1,4 +1,4 @@
-# KimchiTest Backend
+# Kimchi Prototype Backend
 
 A local FastAPI server that does two things:
 
