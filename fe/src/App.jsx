@@ -16,6 +16,25 @@ const CUISINES = [
   ['american', 'American'],
 ]
 
+const INGREDIENT_TYPE_LABELS = {
+  detected: 'Detected',
+  pantry: 'Pantry',
+  extra: 'Need to grab',
+}
+
+function ingredientType(value) {
+  return Object.hasOwn(INGREDIENT_TYPE_LABELS, value) ? value : 'extra'
+}
+
+async function errorMessage(response) {
+  try {
+    const data = await response.json()
+    return data.detail || `Server returned ${response.status}`
+  } catch {
+    return `Server returned ${response.status}`
+  }
+}
+
 export default function App() {
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
@@ -28,6 +47,7 @@ export default function App() {
   const [error, setError] = useState(null)
   const [recipeLoading, setRecipeLoading] = useState(false)
   const [recipeError, setRecipeError] = useState(null)
+  const [selectedRecipeIndex, setSelectedRecipeIndex] = useState(0)
 
   function cleanIngredients(values) {
     return [
@@ -42,6 +62,7 @@ export default function App() {
   function clearRecipes() {
     setRecipes(null)
     setRecipeError(null)
+    setSelectedRecipeIndex(0)
   }
 
   function pick(nextFile) {
@@ -76,7 +97,7 @@ export default function App() {
       })
 
       if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`)
+        throw new Error(await errorMessage(response))
       }
 
       const data = await response.json()
@@ -122,21 +143,24 @@ export default function App() {
       const response = await fetch(`${API_URL}/recipes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients: items, cuisine, count: 3 }),
+        body: JSON.stringify({ ingredients: items, cuisine }),
       })
 
       if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`)
+        throw new Error(await errorMessage(response))
       }
 
       const data = await response.json()
       setRecipes(data.recipes ?? [])
+      setSelectedRecipeIndex(0)
     } catch (recipesError) {
       setRecipeError(`Couldn't generate recipes: ${recipesError.message}`)
     } finally {
       setRecipeLoading(false)
     }
   }
+
+  const selectedRecipe = recipes?.[selectedRecipeIndex] ?? null
 
   return (
     <main className="app">
@@ -270,29 +294,112 @@ export default function App() {
           {recipes.length === 0 ? (
             <p>No recipes returned.</p>
           ) : (
-            recipes.map((recipe, index) => (
-              <article className="recipe" key={recipe.name || index}>
-                <header>
-                  <h3>{recipe.name}</h3>
-                  <span>{recipe.time}</span>
-                </header>
-                {recipe.uses?.length > 0 && (
-                  <p className="uses">Uses: {recipe.uses.join(', ')}</p>
-                )}
-                {recipe.missing?.length > 0 && (
-                  <p className="missing">
-                    You'll also need: {recipe.missing.join(', ')}
-                  </p>
-                )}
-                {recipe.steps?.length > 0 && (
-                  <ol>
-                    {recipe.steps.map((step, stepIndex) => (
-                      <li key={stepIndex}>{step}</li>
-                    ))}
-                  </ol>
-                )}
-              </article>
-            ))
+            <>
+              <div className="recipePicker" aria-label="Choose a recipe">
+                {recipes.map((recipe, index) => (
+                  <button
+                    className={
+                      index === selectedRecipeIndex
+                        ? 'recipeOption selected'
+                        : 'recipeOption'
+                    }
+                    key={recipe.title || index}
+                    type="button"
+                    aria-pressed={index === selectedRecipeIndex}
+                    onClick={() => setSelectedRecipeIndex(index)}
+                  >
+                    <span className="rank">#{index + 1}</span>
+                    <span className="optionTitle">{recipe.title}</span>
+                    <span className="optionSummary">{recipe.summary}</span>
+                    <span className="optionMeta">
+                      {recipe.total_time_minutes} min · {recipe.difficulty}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {selectedRecipe && (
+                <article className="recipeDetail">
+                  <header>
+                    <h2>{selectedRecipe.title}</h2>
+                    <p>{selectedRecipe.summary}</p>
+                    <div className="metaRow">
+                      <span>{selectedRecipe.servings} servings</span>
+                      <span>{selectedRecipe.total_time_minutes} min</span>
+                      <span>{selectedRecipe.difficulty}</span>
+                    </div>
+                  </header>
+
+                  {selectedRecipe.ingredients?.length > 0 && (
+                    <section className="recipeBlock">
+                      <h3>Ingredients</h3>
+                      <ul className="recipeIngredients">
+                        {selectedRecipe.ingredients.map((ingredient, index) => {
+                          const type = ingredientType(ingredient.type)
+
+                          return (
+                            <li
+                              className={`recipeIngredient ${type}`}
+                              key={`${ingredient.item}-${index}`}
+                            >
+                              <span>
+                                <strong>{ingredient.item}</strong>
+                                <small>{ingredient.quantity}</small>
+                              </span>
+                              <span className={`typeBadge ${type}`}>
+                                {INGREDIENT_TYPE_LABELS[type]}
+                              </span>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </section>
+                  )}
+
+                  {selectedRecipe.equipment?.length > 0 && (
+                    <section className="recipeBlock">
+                      <h3>Equipment</h3>
+                      <ul className="compactList">
+                        {selectedRecipe.equipment.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+
+                  {selectedRecipe.steps?.length > 0 && (
+                    <section className="recipeBlock">
+                      <h3>Steps</h3>
+                      <ol className="recipeSteps">
+                        {selectedRecipe.steps.map((step, index) => (
+                          <li key={step.n || index}>
+                            <p>{step.instruction}</p>
+                            {step.tip && <span>{step.tip}</span>}
+                          </li>
+                        ))}
+                      </ol>
+                    </section>
+                  )}
+
+                  {selectedRecipe.chef_tips?.length > 0 && (
+                    <section className="recipeBlock">
+                      <h3>Chef tips</h3>
+                      <ul className="compactList">
+                        {selectedRecipe.chef_tips.map((tip) => (
+                          <li key={tip}>{tip}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+
+                  {selectedRecipe.level_up && (
+                    <p className="levelUp">
+                      <strong>Level up:</strong> {selectedRecipe.level_up}
+                    </p>
+                  )}
+                </article>
+              )}
+            </>
           )}
         </section>
       )}

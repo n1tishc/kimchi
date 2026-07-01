@@ -10,19 +10,20 @@ from pathlib import Path
 from typing import List, Optional
 
 import torch
+from anthropic import Anthropic, AnthropicError
 from PIL import Image
 from transformers import AutoProcessor, AutoModelForImageTextToText
 from transformers import logging as hf_logging
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from openai import OpenAI, OpenAIError
 from pydantic import BaseModel
 
 hf_logging.set_verbosity_error()
 
 MODEL_PATH = "LongGrainRice/kimchi-test"
-RECIPE_MODEL = "gpt-4.1-mini"
+RECIPE_MODEL = "claude-sonnet-4-6"
+RECIPE_PREFILL = '{"recipes":['
 
 # Must match the exact prompt with training
 INSTRUCTION = (
@@ -83,31 +84,54 @@ def _clean(items):
 class RecipeRequest(BaseModel):
     ingredients: List[str]
     cuisine: Optional[str] = "any"
-    count: Optional[int] = 3
 
 
-RECIPE_RESPONSE_SCHEMA = {
-    "type": "object",
-    "additionalProperties": False,
-    "properties": {
-        "recipes": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "additionalProperties": False,
-                "properties": {
-                    "name": {"type": "string"},
-                    "time": {"type": "string"},
-                    "uses": {"type": "array", "items": {"type": "string"}},
-                    "missing": {"type": "array", "items": {"type": "string"}},
-                    "steps": {"type": "array", "items": {"type": "string"}},
-                },
-                "required": ["name", "time", "uses", "missing", "steps"],
-            },
-        },
-    },
-    "required": ["recipes"],
-}
+RECIPE_SYSTEM_PROMPT = """
+You are a professional chef and recipe developer for a home kitchen app.
+
+Return exactly one valid JSON object and nothing else. No markdown, no code fence,
+no preamble, and no commentary. The JSON object must have exactly this top-level
+shape: {"recipes":[...]} with exactly 3 recipe objects.
+
+The user gives you detected ingredients from a closed-vocabulary vision model.
+The model can recognize only 51 ingredient classes and will never detect pantry
+staples like salt, pepper, oil, butter, water, flour, sugar, or dried herbs and
+spices. Do not imply pantry staples were detected.
+
+Selection rules across the three recipes:
+- Return exactly three meaningfully different recipes, ordered best-match first.
+- The best match is the dish that uses the detected ingredients most fully and
+  naturally.
+- Vary dish type, technique, or effort. Do not return three variations of the
+  same dish.
+
+Per-recipe rules:
+- Build each dish around the detected ingredients as the stars. It is fine to
+  skip one detected item if using it would hurt the dish.
+- Every detected ingredient used must appear in ingredients with type "detected".
+- Pantry staples may be assumed and must be tagged "pantry".
+- Add at most 2 small common non-pantry ingredients per recipe, only when they
+  meaningfully improve the dish. These must be tagged "extra".
+- Respect the requested cuisine when it is not "any".
+- Use real quantities, real timings, and sensory doneness cues such as "until
+  deeply golden and fragrant, about 4 minutes".
+- Never use vague directions like "cook until done".
+- Each step should say what to do and briefly why, or what to look, listen, or
+  smell for.
+- Keep every recipe achievable in a normal home kitchen.
+
+Each recipe object must have:
+- "title": string
+- "summary": string, 1-2 sentences
+- "servings": number
+- "total_time_minutes": number
+- "difficulty": "Easy", "Medium", or "Hard"
+- "ingredients": array of {"item": string, "quantity": string, "type": "detected"|"pantry"|"extra"}
+- "equipment": array of strings
+- "steps": array of {"n": number, "instruction": string, "tip": string}
+- "chef_tips": array of strings
+- "level_up": string
+""".strip()
 
 load_dotenv(Path(__file__).with_name(".env"))
 
@@ -117,38 +141,67 @@ recipe_client = None
 def _get_recipe_client():
     global recipe_client
     if recipe_client is None:
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("ANTHROPIC_API_KEY")
         if not api_key:
-            raise HTTPException(500, "OPENAI_API_KEY is not set")
-        recipe_client = OpenAI(api_key=api_key)
+            raise HTTPException(500, "ANTHROPIC_API_KEY is not set")
+        recipe_client = Anthropic(api_key=api_key)
     return recipe_client
 
 
-def _recipe_prompt(items, cuisine, count):
-    cuisine_line = "" if cuisine in ("", "any") else f"The recipes should be {cuisine} cuisine. "
+def _recipe_prompt(items, cuisine):
+    cuisine_label = "any" if cuisine in ("", "any") else cuisine
     return (
-        f"I have these ingredients: {', '.join(items)}. "
-        f"Suggest {count} recipes I can make. {cuisine_line}"
-        "Assume common pantry staples (oil, salt, pepper, water) are available. "
-        "Prefer recipes that use as many of my ingredients as possible. "
-        'Respond with ONLY a JSON object shaped as {"recipes": [...]} where each recipe is '
-        '{"name": string, "time": string, "uses": string[], "missing": string[], '
-        '"steps": string[]}. '
-        '"uses" = which of my ingredients it uses; "missing" = needed items not in my list '
-        "(exclude the pantry staples). Keep steps to 3-6 short lines."
+        f"Detected ingredients: {', '.join(items)}.\n"
+        f"Cuisine preference: {cuisine_label}.\n"
+        "Create exactly three detailed, distinct, genuinely cookable recipes."
     )
 
 
 def _parse_recipe_response(text):
     try:
-        data = json.loads(re.sub(r"```json|```", "", text).strip())
-    except Exception as exc:
-        raise HTTPException(502, "model did not return valid JSON") from exc
+        data = json.loads(text.strip())
+    except json.JSONDecodeError as exc:
+        raise HTTPException(502, "recipe model did not return valid JSON") from exc
 
-    recipes = data.get("recipes") if isinstance(data, dict) else data
+    recipes = data.get("recipes") if isinstance(data, dict) else None
     if not isinstance(recipes, list):
-        raise HTTPException(502, "model did not return a recipes array")
+        raise HTTPException(502, "recipe model did not return a recipes array")
+    if len(recipes) != 3:
+        raise HTTPException(502, "recipe model did not return exactly 3 recipes")
+
+    required_recipe_fields = {
+        "title",
+        "summary",
+        "servings",
+        "total_time_minutes",
+        "difficulty",
+        "ingredients",
+        "equipment",
+        "steps",
+        "chef_tips",
+        "level_up",
+    }
+    valid_types = {"detected", "pantry", "extra"}
+
+    for recipe in recipes:
+        if not isinstance(recipe, dict) or not required_recipe_fields <= recipe.keys():
+            raise HTTPException(502, "recipe model returned an incomplete recipe")
+        for ingredient in recipe["ingredients"]:
+            if not isinstance(ingredient, dict) or ingredient.get("type") not in valid_types:
+                raise HTTPException(502, "recipe model returned an invalid ingredient tag")
+
     return recipes
+
+
+def _extract_message_text(message):
+    parts = []
+    for block in message.content:
+        if isinstance(block, dict):
+            if block.get("type") == "text":
+                parts.append(block.get("text", ""))
+        elif getattr(block, "type", None) == "text":
+            parts.append(block.text)
+    return "".join(parts)
 
 
 @torch.inference_mode()
@@ -190,30 +243,24 @@ def recipes_endpoint(req: RecipeRequest):
     if not items:
         raise HTTPException(400, "ingredients is empty")
 
-    requested_count = req.count if req.count is not None else 3
-    count = max(1, min(requested_count, 5))
     cuisine = (req.cuisine or "any").strip().lower()
-    prompt = _recipe_prompt(items, cuisine, count)
+    prompt = _recipe_prompt(items, cuisine)
 
     try:
-        response = _get_recipe_client().responses.create(
+        message = _get_recipe_client().messages.create(
             model=RECIPE_MODEL,
-            instructions="You generate concise, practical recipe ideas as JSON only.",
-            input=prompt,
-            max_output_tokens=1500,
-            text={
-                "format": {
-                    "type": "json_schema",
-                    "name": "recipe_response",
-                    "schema": RECIPE_RESPONSE_SCHEMA,
-                    "strict": True,
-                },
-            },
+            max_tokens=4000,
+            system=RECIPE_SYSTEM_PROMPT,
+            messages=[
+                {"role": "user", "content": prompt},
+                {"role": "assistant", "content": RECIPE_PREFILL},
+            ],
+            temperature=0.4,
         )
-    except OpenAIError as exc:
+    except AnthropicError as exc:
         raise HTTPException(502, f"recipe model request failed: {exc}") from exc
 
-    return {"recipes": _parse_recipe_response(response.output_text)}
+    return {"recipes": _parse_recipe_response(RECIPE_PREFILL + _extract_message_text(message))}
 
 
 if __name__ == "__main__":
