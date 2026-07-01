@@ -348,7 +348,7 @@ export default function App() {
         <header className="intro">
           <div className="introText">
             <p className="eyebrow">AI kitchen assistant</p>
-            <h1>KimchiTest</h1>
+            <h1>Kimchi Prototype</h1>
             <p className="tagline">
               Photograph your ingredients and let the model turn them into recipes you can
               actually cook tonight.

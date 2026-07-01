@@ -1,4 +1,4 @@
-# KimchiTest
+# Kimchi Prototype
 
 **Photograph your ingredients. Get recipes.**
 

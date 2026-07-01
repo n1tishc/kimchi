@@ -1,4 +1,4 @@
-# KimchiTest Frontend
+# Kimchi Prototype Frontend
 
 React frontend for the local KimchiTest pipeline. It runs as a three-step flow:
 
