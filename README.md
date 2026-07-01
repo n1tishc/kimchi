@@ -7,10 +7,11 @@ KimchiTest is an end-to-end ML portfolio project: a fine-tuned vision-language m
 ## How it works
 
 1. **Arrange ingredients on a flat surface** (a "slab" — a counter, cutting board, or table) and take a photo.
-2. **Upload the photo** in the web app.
+2. **Upload the photo** in the web app, or use the Camera button on a device that supports camera capture.
 3. The frontend POSTs the image to a local inference server, which runs it through the fine-tuned model and returns a JSON array of detected ingredients.
-4. **Review and edit** the detected ingredients — the model has strong recall on items it was trained on, but you can correct or add anything it missed.
+4. **Review and edit** the detected ingredients — the model has strong recall on items it was trained on, but you can remove false positives or add anything it missed.
 5. **Pick a cuisine** (optional) and generate recipes. This step calls the OpenAI API with the confirmed ingredient list and returns three distinct, cookable recipes ranked best-match first.
+6. **Choose a recipe** from the three summary cards and read the full recipe detail, including detected, pantry, and extra ingredients.
 
 ```
  ┌──────────────┐        POST /predict         ┌──────────────────┐
@@ -43,10 +44,12 @@ kimchitest/
 │   └── .venv/                   # backend virtualenv (one level up in practice)
 └── fe/
     ├── src/
-    │   ├── App.jsx               # main app: upload, scan, ingredients, recipes
-    │   └── App.css                # slab-themed styling
+    │   ├── App.jsx               # three-phase UI: scan, review, cook
+    │   └── App.css                # slab-themed styling, picker, skeleton states
+    ├── public/
+    │   └── demo-ingredients.png   # local demo-mode image
     ├── package.json
-    └── .env.example              # VITE_API_URL config
+    └── .env.example              # VITE_API_URL and VITE_DEMO config
 ```
 
 ## Tech stack
@@ -90,6 +93,8 @@ npm run dev
 ```
 
 Open `http://localhost:5173`.
+
+For a backend-free walkthrough of the frontend, set `VITE_DEMO=1` in `fe/.env` or open `http://localhost:5173?demo=1`. Demo mode uses bundled sample data and does not call `/predict` or `/recipes`.
 
 ## Prototype scope
 

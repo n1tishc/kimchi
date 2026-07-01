@@ -394,7 +394,7 @@ export default function App() {
                       <CameraIcon />
                     </span>
                     <span className="dropzoneTitle">Click to choose a photo</span>
-                    <span className="dropzoneHint">or drag an image of your ingredients here</span>
+                    <span className="dropzoneHint">or use Camera to take one</span>
                   </span>
                 )}
                 <input
