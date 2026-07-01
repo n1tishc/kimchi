@@ -1,40 +1,44 @@
 :root {
-  /* Palette: warm cream base, herb green brand, terracotta accent, charcoal ink */
-  --bg: #f7f3ea;
-  --bg-tint: #f1ede1;
-  --surface: #fffdf8;
-  --ink: #23201a;
-  --ink-soft: #6b6455;
-  --ink-faint: #938b78;
-  --line: #e7e0cf;
-  --line-strong: #d8cfb8;
+  /* Kimchi palette: warm cream base, coral/peach tints, deep brick-red accent */
+  --bg: #feeac9;
+  --bg-tint: #fbdcc0;
+  --surface: #fff8ef;
+  --ink: #660b05;
+  --ink-soft: #9a4a40;
+  --ink-faint: #bf8a80;
+  --line: #f4d5b2;
+  --line-strong: #ecc192;
 
-  --brand: #2f5d3f;
-  --brand-strong: #234a31;
-  --brand-tint: #e7f0e6;
-  --brand-tint-line: #c4d9c2;
+  /* Terracotta rose — secondary, "detected" states */
+  --brand: #b8412e;
+  --brand-strong: #8c1007;
+  --brand-tint: #eda897;
+  --brand-tint-line: #d67e69;
 
-  --accent: #c8642f;
-  --accent-tint: #fdefe2;
-  --accent-line: #f0cfa8;
+  /* Deep brick red — the primary call-to-action color */
+  --accent: #8c1007;
+  --accent-strong: #660b05;
+  --accent-tint: #fdd8d2;
+  --accent-line: #f3b2a8;
 
-  --info-tint: #eef3f6;
-  --info-line: #cddbe4;
-  --info-ink: #33566b;
+  /* Warm taupe — the calm neutral, used for "pantry" states */
+  --info-tint: #efe1cf;
+  --info-line: #ddc7ab;
+  --info-ink: #8a6a4a;
 
   --danger-bg: #fdeeec;
   --danger-line: #efb7ad;
   --danger-ink: #8c2c20;
 
-  --radius-lg: 20px;
-  --radius: 14px;
-  --radius-sm: 10px;
-  --shadow-sm: 0 1px 2px rgba(35, 32, 26, 0.05), 0 1px 3px rgba(35, 32, 26, 0.04);
-  --shadow-md: 0 10px 30px -12px rgba(35, 32, 26, 0.18);
-  --shadow-lg: 0 24px 48px -20px rgba(35, 47, 33, 0.28);
+  --radius-lg: 30px;
+  --radius: 20px;
+  --radius-sm: 14px;
+  --shadow-sm: 0 1px 2px rgba(40, 34, 20, 0.05), 0 1px 3px rgba(40, 34, 20, 0.04);
+  --shadow-md: 0 14px 34px -16px rgba(40, 34, 20, 0.2);
+  --shadow-lg: 0 26px 52px -22px rgba(76, 58, 30, 0.3);
 
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: Fraunces, Georgia, "Times New Roman", serif;
+  --font-sans: Lato, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: Prompt, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
   color: var(--ink);
   font-family: var(--font-sans);
@@ -59,11 +63,68 @@ select {
 }
 
 .page {
+  position: relative;
   min-height: 100svh;
-  background:
-    radial-gradient(120% 60% at 100% 0%, rgba(200, 100, 47, 0.07), transparent 60%),
-    radial-gradient(120% 60% at 0% 0%, rgba(47, 93, 63, 0.08), transparent 55%),
-    var(--bg);
+  isolation: isolate;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(60% 45% at 8% 0%, rgba(140, 16, 7, 0.22), transparent 70%),
+    radial-gradient(55% 40% at 100% 12%, rgba(217, 99, 79, 0.28), transparent 70%),
+    radial-gradient(50% 40% at 88% 100%, rgba(140, 16, 7, 0.16), transparent 72%),
+    radial-gradient(60% 45% at 0% 92%, rgba(217, 99, 79, 0.2), transparent 72%);
+  background-attachment: fixed;
+}
+
+/* Flowing wavy bands layered into the background */
+.page::before,
+.page::after {
+  content: "";
+  position: fixed;
+  left: -10%;
+  right: -10%;
+  height: 46vh;
+  z-index: -1;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  opacity: 0.55;
+}
+
+.page::before {
+  top: -6vh;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 520' preserveAspectRatio='none'%3E%3Cpath fill='%238c1007' fill-opacity='0.16' d='M0 220 C 240 120 480 320 720 240 C 960 160 1200 300 1440 200 L1440 0 L0 0 Z'/%3E%3Cpath fill='%23d9634f' fill-opacity='0.16' d='M0 300 C 260 200 520 380 780 300 C 1040 220 1240 360 1440 280 L1440 0 L0 0 Z'/%3E%3C/svg%3E");
+}
+
+.page::after {
+  bottom: -6vh;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 520' preserveAspectRatio='none'%3E%3Cpath fill='%23d9634f' fill-opacity='0.16' d='M0 300 C 240 400 480 200 720 280 C 960 360 1200 220 1440 320 L1440 520 L0 520 Z'/%3E%3Cpath fill='%238c1007' fill-opacity='0.14' d='M0 380 C 260 460 520 300 780 360 C 1040 420 1240 300 1440 380 L1440 520 L0 520 Z'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .page::before {
+    animation: waveDriftTop 26s ease-in-out infinite alternate;
+  }
+  .page::after {
+    animation: waveDriftBottom 30s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes waveDriftTop {
+  from {
+    transform: translateX(-2%);
+  }
+  to {
+    transform: translateX(3%);
+  }
+}
+
+@keyframes waveDriftBottom {
+  from {
+    transform: translateX(2%);
+  }
+  to {
+    transform: translateX(-3%);
+  }
 }
 
 .app {
@@ -82,27 +143,19 @@ select {
   padding: 8px 4px 4px;
 }
 
-.brandMark {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  flex-shrink: 0;
-  color: var(--brand);
-  background: var(--brand-tint);
-  border: 1px solid var(--brand-tint-line);
-  border-radius: 16px;
-  box-shadow: var(--shadow-sm);
-}
-
 .introText {
   min-width: 0;
 }
 
 .eyebrow {
-  margin: 0 0 2px;
-  color: var(--brand);
-  font-size: 0.72rem;
+  display: inline-block;
+  margin: 0 0 6px;
+  padding: 3px 12px;
+  color: var(--brand-strong);
+  background: var(--brand-tint);
+  border: 1.5px dashed var(--brand-tint-line);
+  border-radius: 999px;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -112,11 +165,10 @@ select {
   margin: 0;
   color: var(--ink);
   font-family: var(--font-display);
-  font-optical-sizing: auto;
   font-size: clamp(2.4rem, 8vw, 3.4rem);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.005em;
 }
 
 .tagline {
@@ -166,7 +218,7 @@ select {
 }
 
 .dropzone:focus-within {
-  outline: 3px solid rgba(47, 93, 63, 0.28);
+  outline: 3px solid rgba(217, 99, 79, 0.45);
   outline-offset: 3px;
 }
 
@@ -223,10 +275,11 @@ select {
   padding: 0 20px;
   color: var(--ink);
   background: var(--surface);
-  border: 1px solid var(--line-strong);
-  border-radius: 12px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 999px;
   cursor: pointer;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 600;
   line-height: 1;
   box-shadow: var(--shadow-sm);
   transition: border-color 140ms ease, background-color 140ms ease, transform 120ms ease,
@@ -238,7 +291,7 @@ select {
 }
 
 .button:hover:not(:disabled) {
-  border-color: var(--brand);
+  border-color: var(--accent);
   transform: translateY(-1px);
 }
 
@@ -247,20 +300,20 @@ select {
 }
 
 .button:focus-visible {
-  outline: 3px solid rgba(47, 93, 63, 0.28);
+  outline: 3px solid rgba(140, 16, 7, 0.3);
   outline-offset: 2px;
 }
 
 .button.primary {
-  color: #fffdf8;
-  background: var(--brand);
-  border-color: var(--brand);
-  box-shadow: 0 8px 18px -8px rgba(47, 93, 63, 0.6);
+  color: #fff8ee;
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 10px 20px -8px rgba(140, 16, 7, 0.65);
 }
 
 .button.primary:hover:not(:disabled) {
-  background: var(--brand-strong);
-  border-color: var(--brand-strong);
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
 }
 
 .button:disabled {
@@ -317,7 +370,7 @@ select {
 .field select:focus,
 .ingredientForm input:focus {
   border-color: var(--brand);
-  outline: 3px solid rgba(47, 93, 63, 0.22);
+  outline: 3px solid rgba(217, 99, 79, 0.4);
   outline-offset: 1px;
 }
 
@@ -369,9 +422,9 @@ select {
   margin: 0;
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1.15;
 }
 
 .sectionSub {
@@ -416,7 +469,7 @@ select {
   padding: 0;
   place-items: center;
   color: var(--brand-strong);
-  background: rgba(47, 93, 63, 0.12);
+  background: rgba(217, 99, 79, 0.16);
   border: 0;
   border-radius: 50%;
   cursor: pointer;
@@ -427,11 +480,11 @@ select {
 }
 
 .chipRemove:hover {
-  background: rgba(47, 93, 63, 0.24);
+  background: rgba(217, 99, 79, 0.28);
 }
 
 .chipRemove:focus-visible {
-  outline: 3px solid rgba(47, 93, 63, 0.3);
+  outline: 3px solid rgba(217, 99, 79, 0.45);
   outline-offset: 2px;
 }
 
@@ -496,7 +549,7 @@ select {
 }
 
 .recipeOption:focus-visible {
-  outline: 3px solid rgba(47, 93, 63, 0.28);
+  outline: 3px solid rgba(217, 99, 79, 0.45);
   outline-offset: 2px;
 }
 
@@ -569,10 +622,10 @@ select {
   margin: 0;
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: clamp(1.55rem, 5vw, 2rem);
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.6rem, 5vw, 2.05rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.005em;
   text-wrap: balance;
 }
 
@@ -592,10 +645,10 @@ select {
 }
 
 .metaRow span {
-  padding: 7px 12px;
-  color: var(--ink);
-  background: var(--bg-tint);
-  border: 1px solid var(--line);
+  padding: 7px 14px;
+  color: var(--brand-strong);
+  background: var(--brand-tint);
+  border: 1.5px dashed var(--brand-tint-line);
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 700;
@@ -608,12 +661,13 @@ select {
 .recipeBlock h3 {
   margin: 0 0 12px;
   padding-bottom: 8px;
-  color: var(--ink);
+  color: var(--accent);
+  font-family: var(--font-display);
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1.5px dashed var(--line-strong);
 }
 
 .recipeIngredients,
@@ -670,8 +724,8 @@ select {
 }
 
 .typeBadge.detected {
-  color: var(--brand-strong);
-  background: #d3e6d0;
+  color: #fff8ef;
+  background: var(--brand);
 }
 
 .recipeIngredient.pantry {
@@ -682,7 +736,7 @@ select {
 
 .typeBadge.pantry {
   color: var(--info-ink);
-  background: #d6e3ec;
+  background: #e4d3ba;
 }
 
 .recipeIngredient.extra {
@@ -758,11 +812,12 @@ select {
   top: 0;
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
+  font-family: var(--font-display);
   color: var(--brand-strong);
   background: var(--brand-tint);
-  border: 1px solid var(--brand-tint-line);
+  border: 2px dashed var(--brand-tint-line);
   border-radius: 50%;
   font-size: 0.9rem;
   font-weight: 800;
@@ -810,11 +865,6 @@ select {
 
   .intro {
     gap: 12px;
-  }
-
-  .brandMark {
-    width: 46px;
-    height: 46px;
   }
 
   .uploadCard,
@@ -876,10 +926,10 @@ select {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 12px 16px;
+  padding: 12px 18px;
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -898,22 +948,24 @@ select {
 .stepDot {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
   border-radius: 50%;
+  font-family: var(--font-display);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ink-faint);
   background: var(--bg-tint);
-  border: 1px solid var(--line-strong);
+  border: 2px dashed var(--line-strong);
   transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease,
     transform 200ms ease;
 }
 
 .stepLabel {
+  font-family: var(--font-display);
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ink-faint);
   white-space: nowrap;
   transition: color 200ms ease;
@@ -930,11 +982,12 @@ select {
 }
 
 .step.active .stepDot {
-  color: #fffdf8;
-  background: var(--brand);
-  border-color: var(--brand);
-  transform: scale(1.06);
-  box-shadow: 0 6px 14px -6px rgba(47, 93, 63, 0.65);
+  color: #fff8ee;
+  background: var(--accent);
+  border-style: solid;
+  border-color: var(--accent);
+  transform: scale(1.08);
+  box-shadow: 0 6px 14px -6px rgba(140, 16, 7, 0.6);
 }
 
 .step.active .stepLabel {
@@ -942,9 +995,10 @@ select {
 }
 
 .step.done .stepDot {
-  color: #fffdf8;
-  background: var(--brand-strong);
-  border-color: var(--brand-strong);
+  color: #fff8ee;
+  background: var(--brand);
+  border-style: solid;
+  border-color: var(--brand);
 }
 
 .step.done .stepLabel {
@@ -1052,7 +1106,7 @@ select {
 }
 
 .backButton:focus-visible {
-  outline: 3px solid rgba(47, 93, 63, 0.28);
+  outline: 3px solid rgba(217, 99, 79, 0.45);
   outline-offset: 2px;
 }
 

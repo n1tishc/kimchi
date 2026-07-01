@@ -346,9 +346,6 @@ export default function App() {
     <div className="page">
       <div className="app">
         <header className="intro">
-          <span className="brandMark" aria-hidden="true">
-            <LeafIcon />
-          </span>
           <div className="introText">
             <p className="eyebrow">AI kitchen assistant</p>
             <h1>KimchiTest</h1>
@@ -394,7 +391,7 @@ export default function App() {
                       <CameraIcon />
                     </span>
                     <span className="dropzoneTitle">Click to choose a photo</span>
-                    <span className="dropzoneHint">or use Camera to take one</span>
+                    <span className="dropzoneHint">or drag an image of your ingredients here</span>
                   </span>
                 )}
                 <input
@@ -407,12 +404,11 @@ export default function App() {
 
               <div className="actions">
                 <label className="button">
-                  <CameraIcon />
-                  Camera
+                  <UploadIcon />
+                  Upload
                   <input
                     type="file"
                     accept="image/*"
-                    capture="environment"
                     hidden
                     onChange={(event) => pick(event.target.files?.[0])}
                   />
@@ -715,21 +711,6 @@ function RecipeSkeleton() {
   )
 }
 
-function LeafIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M4 20c0-8 6-14 16-14 0 10-6 16-14 16-1 0-2-.2-2-.2S4 21 4 20Z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M8 18c3-4 6-6 10-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  )
-}
-
 function CameraIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -740,6 +721,27 @@ function CameraIcon() {
         strokeLinejoin="round"
       />
       <circle cx="12" cy="12.5" r="3.2" stroke="currentColor" strokeWidth="1.7" />
+    </svg>
+  )
+}
+
+function UploadIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }
