@@ -1,16 +1,5 @@
 """
 KimchiTest local inference and recipe server.
-
-Setup:
-    python -m venv .venv && source .venv/bin/activate      # Windows: .venv\\Scripts\\activate
-    pip install "transformers>=4.46" torch pillow fastapi "uvicorn[standard]" python-multipart num2words openai
-    export OPENAI_API_KEY=your_key_here
-
-Run:
-    uvicorn server:app --port 8000
-    # or just: python server.py
-
-Frontend endpoint -> http://localhost:8000  (pair with a locally-run frontend, not the hosted artifact)
 """
 
 import io
