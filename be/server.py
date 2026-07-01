@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import torch
-from anthropic import Anthropic, AnthropicError
+from openai import OpenAI, OpenAIError
 from PIL import Image
 from transformers import AutoProcessor, AutoModelForImageTextToText
 from transformers import logging as hf_logging
@@ -22,8 +22,7 @@ from pydantic import BaseModel
 hf_logging.set_verbosity_error()
 
 MODEL_PATH = "LongGrainRice/kimchi-test"
-RECIPE_MODEL = "claude-sonnet-4-6"
-RECIPE_PREFILL = '{"recipes":['
+RECIPE_MODEL = "gpt-4.1-mini"
 
 # Must match the exact prompt with training
 INSTRUCTION = (
@@ -133,6 +132,76 @@ Each recipe object must have:
 - "level_up": string
 """.strip()
 
+
+RECIPE_RESPONSE_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "recipes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "title": {"type": "string"},
+                    "summary": {"type": "string"},
+                    "servings": {"type": "number"},
+                    "total_time_minutes": {"type": "number"},
+                    "difficulty": {
+                        "type": "string",
+                        "enum": ["Easy", "Medium", "Hard"],
+                    },
+                    "ingredients": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "properties": {
+                                "item": {"type": "string"},
+                                "quantity": {"type": "string"},
+                                "type": {
+                                    "type": "string",
+                                    "enum": ["detected", "pantry", "extra"],
+                                },
+                            },
+                            "required": ["item", "quantity", "type"],
+                        },
+                    },
+                    "equipment": {"type": "array", "items": {"type": "string"}},
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "properties": {
+                                "n": {"type": "number"},
+                                "instruction": {"type": "string"},
+                                "tip": {"type": "string"},
+                            },
+                            "required": ["n", "instruction", "tip"],
+                        },
+                    },
+                    "chef_tips": {"type": "array", "items": {"type": "string"}},
+                    "level_up": {"type": "string"},
+                },
+                "required": [
+                    "title",
+                    "summary",
+                    "servings",
+                    "total_time_minutes",
+                    "difficulty",
+                    "ingredients",
+                    "equipment",
+                    "steps",
+                    "chef_tips",
+                    "level_up",
+                ],
+            },
+        },
+    },
+    "required": ["recipes"],
+}
+
 load_dotenv(Path(__file__).with_name(".env"))
 
 recipe_client = None
@@ -141,10 +210,10 @@ recipe_client = None
 def _get_recipe_client():
     global recipe_client
     if recipe_client is None:
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise HTTPException(500, "ANTHROPIC_API_KEY is not set")
-        recipe_client = Anthropic(api_key=api_key)
+            raise HTTPException(500, "OPENAI_API_KEY is not set")
+        recipe_client = OpenAI(api_key=api_key)
     return recipe_client
 
 
@@ -193,17 +262,6 @@ def _parse_recipe_response(text):
     return recipes
 
 
-def _extract_message_text(message):
-    parts = []
-    for block in message.content:
-        if isinstance(block, dict):
-            if block.get("type") == "text":
-                parts.append(block.get("text", ""))
-        elif getattr(block, "type", None) == "text":
-            parts.append(block.text)
-    return "".join(parts)
-
-
 @torch.inference_mode()
 def predict(image: Image.Image):
     image = image.convert("RGB")
@@ -247,20 +305,25 @@ def recipes_endpoint(req: RecipeRequest):
     prompt = _recipe_prompt(items, cuisine)
 
     try:
-        message = _get_recipe_client().messages.create(
+        response = _get_recipe_client().responses.create(
             model=RECIPE_MODEL,
-            max_tokens=4000,
-            system=RECIPE_SYSTEM_PROMPT,
-            messages=[
-                {"role": "user", "content": prompt},
-                {"role": "assistant", "content": RECIPE_PREFILL},
-            ],
+            instructions=RECIPE_SYSTEM_PROMPT,
+            input=prompt,
+            max_output_tokens=4000,
             temperature=0.4,
+            text={
+                "format": {
+                    "type": "json_schema",
+                    "name": "recipe_response",
+                    "schema": RECIPE_RESPONSE_SCHEMA,
+                    "strict": True,
+                },
+            },
         )
-    except AnthropicError as exc:
+    except OpenAIError as exc:
         raise HTTPException(502, f"recipe model request failed: {exc}") from exc
 
-    return {"recipes": _parse_recipe_response(RECIPE_PREFILL + _extract_message_text(message))}
+    return {"recipes": _parse_recipe_response(response.output_text)}
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # KimchiTest Frontend
 
-Minimal React app for sending an ingredient photo to the local FastAPI model and showing the detected ingredients.
+Minimal React app for sending an ingredient photo to the local FastAPI model, editing the detected ingredients, and choosing between three generated recipe options.
 
 ## Run Locally
 
@@ -14,8 +14,8 @@ The app is served at `http://localhost:5173`.
 
 The backend (`server.py`) must be running on `http://localhost:8000` first. If it is running somewhere else, adjust `VITE_API_URL` in `.env`.
 
-Recipe generation uses `ANTHROPIC_API_KEY` on the backend only:
+Recipe generation uses `OPENAI_API_KEY` on the backend only:
 
 ```bash
-export ANTHROPIC_API_KEY=your_key_here
+export OPENAI_API_KEY=your_key_here
 ```
