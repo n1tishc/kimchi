@@ -25,9 +25,27 @@ const INGREDIENT_TYPE_LABELS = {
 
 const PHASES = ['upload', 'ingredients', 'recipes']
 const STEPS = [
-  ['upload', 'Scan'],
-  ['ingredients', 'Review'],
-  ['recipes', 'Cook'],
+  {
+    key: 'upload',
+    number: '01',
+    label: 'Show & tell',
+    title: 'What are we working with?',
+    description: 'Give the chef a quick look at today’s ingredients.',
+  },
+  {
+    key: 'ingredients',
+    number: '02',
+    label: 'Roll call',
+    title: 'Let’s make the cast list.',
+    description: 'Fix the line-up, then pick a culinary mood.',
+  },
+  {
+    key: 'recipes',
+    number: '03',
+    label: 'Make magic',
+    title: 'Dinner has entered the chat.',
+    description: 'Choose a recipe and let the good smells begin.',
+  },
 ]
 
 // Demo data lets every screen render for a live walkthrough even if the
@@ -180,6 +198,7 @@ async function errorMessage(response) {
 }
 
 export default function App() {
+  const [view, setView] = useState('home')
   const [phase, setPhase] = useState('upload')
   const [direction, setDirection] = useState('forward')
   const [file, setFile] = useState(null)
@@ -204,9 +223,15 @@ export default function App() {
   }, [])
 
   function goTo(next, dir = 'forward') {
+    setView('workflow')
     setDirection(dir)
     setPhase(next)
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function goHome() {
+    setView('home')
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }))
   }
 
   function cleanIngredients(values) {
@@ -397,42 +422,100 @@ export default function App() {
 
   const selectedRecipe = recipes?.[selectedRecipeIndex] ?? null
   const activeStep = PHASES.indexOf(phase)
+  const currentStep = STEPS[activeStep]
+
+  function beginCooking() {
+    setView('workflow')
+    window.requestAnimationFrame(() => {
+      document.querySelector('#workflow')?.focus({ preventScroll: true })
+      document.querySelector('#workflow')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
 
   return (
     <div className="page">
-      <a className="skipLink" href="#workflow">
-        Skip to workspace
+      <a className="skipLink" href={view === 'home' ? '#how-it-works' : '#workflow'}>
+        Skip to content
       </a>
       <div className="app">
-        <header className="intro">
-          <div className="masthead">
-            <div className="wordmark">
-              <span className="wordmarkMark" aria-hidden="true">K</span>
-              <span>Kimchi</span>
-            </div>
-            <p className="edition">Ingredient reader · 01</p>
-          </div>
-          <div className="introText">
-            <p className="eyebrow">Cook from what you have</p>
-            <h1>Turn today&apos;s ingredients into dinner.</h1>
-            <p className="tagline">
-              Photograph what&apos;s on the counter. We&apos;ll identify the ingredients, then give you
-              a few thoughtful ways to cook them.
-            </p>
+        <header className="masthead">
+          <button className="wordmark" type="button" onClick={goHome} aria-label="Kimchi home">
+            <span className="wordmarkMark" aria-hidden="true">K</span>
+            <span>Kimchi</span>
+          </button>
+          <div className="mastheadActions">
+            {view === 'home' && (
+              <a className="textLink" href="#how-it-works">How it works</a>
+            )}
+            <button className="navButton" type="button" onClick={view === 'home' ? beginCooking : startOver}>
+              {view === 'home' ? 'Start cooking' : 'New dish'}
+            </button>
           </div>
         </header>
 
-        <main id="workflow">
+        {view === 'home' ? (
+          <main className="home" id="home">
+            <section className="hero" aria-labelledby="home-title">
+              <div className="heroCopy">
+                <p className="eyebrow">Your tiny kitchen co-pilot</p>
+                <h1 id="home-title">Dinner, from the things already staring at you.</h1>
+                <p className="tagline">A photo in. A real recipe out. No doom-scrolling, no shopping-list guilt.</p>
+                <button className="button primary heroButton" type="button" onClick={beginCooking}>
+                  Let&apos;s see the fridge <ArrowRightIcon />
+                </button>
+                <p className="heroFootnote">Takes about a minute. Chef&apos;s promise.</p>
+              </div>
+              <HomeScanVisual />
+            </section>
+
+            <section className="howItWorks" id="how-it-works" aria-labelledby="how-title">
+              <div className="sectionLead">
+                <p className="eyebrow">The three-act dinner</p>
+                <h2 id="how-title">No recipe rabbit hole. Just this.</h2>
+              </div>
+              <div className="phaseCards">
+                {STEPS.map((step) => (
+                  <button className={`phaseCard ${step.key}`} type="button" key={step.key} onClick={beginCooking}>
+                    <span className="phaseIllustration" aria-hidden="true"><PhaseIllustration phase={step.key} /></span>
+                    <span className="phaseNumber">{step.number}</span>
+                    <strong>{step.label}</strong>
+                    <span>{step.description}</span>
+                    <span className="phaseCardArrow" aria-hidden="true"><ArrowRightIcon /></span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="homeSignoff">
+              <div className="signoffMark" aria-hidden="true">
+                <SparkIcon />
+              </div>
+              <div>
+                <p className="eyebrow">Built for “what even is dinner?” nights</p>
+                <h2>Less figuring out. More cooking.</h2>
+              </div>
+              <button className="button" type="button" onClick={beginCooking}>Start with a photo <ArrowRightIcon /></button>
+            </section>
+          </main>
+        ) : (
+        <main id="workflow" tabIndex="-1" className="workflow">
+          <section className="kitchenStage" aria-labelledby="stage-title">
+            <div className="stageCopy">
+              <p className="eyebrow">{currentStep.number} · {currentStep.label}</p>
+              <h1 id="stage-title">{currentStep.title}</h1>
+              <p>{currentStep.description}</p>
+            </div>
+          </section>
           <nav className="stepper" aria-label="Progress">
-            {STEPS.map(([key, label], index) => {
+            {STEPS.map((step, index) => {
               const state =
                 index < activeStep ? 'done' : index === activeStep ? 'active' : 'upcoming'
               return (
-                <div className={`step ${state}`} key={key}>
+                <div className={`step ${state}`} key={step.key}>
                   <span className="stepDot" aria-hidden="true">
-                    {state === 'done' ? <CheckIcon /> : `0${index + 1}`}
+                    {state === 'done' ? <CheckIcon /> : step.number}
                   </span>
-                  <span className="stepLabel">{label}</span>
+                  <span className="stepLabel">{step.label}</span>
                   {index < STEPS.length - 1 && <span className="stepLine" aria-hidden="true" />}
                 </div>
               )
@@ -443,7 +526,7 @@ export default function App() {
           {phase === 'upload' && (
             <section className="card uploadCard" aria-label="Upload ingredients">
               <div className="sectionHead">
-                <h2>Snap your ingredients</h2>
+                  <h2>Show the chef your haul.</h2>
                 <p className="sectionSub">
                   Add a clear, well-lit photo and we&apos;ll read what&apos;s on the counter.
                 </p>
@@ -532,9 +615,7 @@ export default function App() {
                   <h2>
                     {items.length} ingredient{items.length !== 1 ? 's' : ''} found
                   </h2>
-                  <p className="sectionSub">
-                    Remove anything that is off, or add what the camera missed.
-                  </p>
+                    <p className="sectionSub">Keep the good stuff. Cross off the impostors.</p>
                 </div>
               </div>
 
@@ -619,7 +700,7 @@ export default function App() {
                   Ingredients
                 </button>
                 <div>
-                  <h2>Your recipes</h2>
+                  <h2>Pick tonight&apos;s plot twist.</h2>
                   <p className="sectionSub">
                     {recipeLoading
                       ? 'Cooking up three ideas from your ingredients...'
@@ -748,6 +829,7 @@ export default function App() {
           )}
           </div>
         </main>
+        )}
       </div>
     </div>
   )
@@ -784,6 +866,49 @@ function RecipeSkeleton() {
         ))}
       </div>
     </div>
+  )
+}
+
+function HomeScanVisual() {
+  return (
+    <div className="homeScanVisual" aria-hidden="true">
+      <svg viewBox="0 0 360 360" fill="none">
+        <rect className="scanPosterShadow" x="66" y="50" width="225" height="260" transform="rotate(8 66 50)" />
+        <rect className="scanPoster" x="52" y="40" width="225" height="260" transform="rotate(-5 52 40)" />
+        <path className="scanFrame" d="M102 134V99h35m86 0h35v35m0 92v35h-35m-86 0h-35v-35" />
+        <circle className="scanLens" cx="180" cy="180" r="52" />
+        <path className="scanAperture" d="m180 137 37 21v44l-37 21-37-21v-44l37-21Z" />
+        <path className="scanBeam" d="M75 287 145 237M285 76l-70 51" />
+        <path className="scanSpark" d="M300 116v25M287 128h25M74 210v20M64 220h20" />
+      </svg>
+    </div>
+  )
+}
+
+function PhaseIllustration({ phase }) {
+  if (phase === 'upload') {
+    return (
+      <svg viewBox="0 0 90 70" fill="none">
+        <rect x="17" y="11" width="56" height="45" rx="8" />
+        <circle cx="45" cy="34" r="12" />
+        <path d="m29 11 5-7h22l5 7M22 63h46" />
+      </svg>
+    )
+  }
+  if (phase === 'ingredients') {
+    return (
+      <svg viewBox="0 0 90 70" fill="none">
+        <path d="M20 17h50l-5 39H25l-5-39ZM17 17h56M30 9h30" />
+        <path d="m32 34 7 7 17-18" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 90 70" fill="none">
+      <path d="M20 46c0-21 50-21 50 0v10H20V46Z" />
+      <path d="M25 46c5-15 35-15 40 0M32 30c0-12 7-17 13-17s13 5 13 17M45 13V7" />
+      <path d="M13 58h64" />
+    </svg>
   )
 }
 
@@ -862,10 +987,27 @@ function ArrowLeftIcon() {
   )
 }
 
+function ArrowRightIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="m9 5 7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 function CheckIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="m5 13 4 4L19 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function SparkIcon() {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path d="M32 6c2 16 8 23 24 26-16 3-22 10-24 26-2-16-8-23-24-26 16-3 22-10 24-26Z" />
+      <path d="M52 10v10M47 15h10M13 46v8M9 50h8" />
     </svg>
   )
 }
