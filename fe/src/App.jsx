@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const REQUEST_TIMEOUT_MS = 30_000
 const CUISINES = [
   ['any', 'Any'],
   ['italian', 'Italian'],
@@ -192,6 +193,15 @@ export default function App() {
   const [recipeLoading, setRecipeLoading] = useState(false)
   const [recipeError, setRecipeError] = useState(null)
   const [selectedRecipeIndex, setSelectedRecipeIndex] = useState(0)
+  const previewUrlRef = useRef(null)
+  const scanAbortRef = useRef(null)
+  const recipesAbortRef = useRef(null)
+
+  useEffect(() => () => {
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current)
+    scanAbortRef.current?.abort()
+    recipesAbortRef.current?.abort()
+  }, [])
 
   function goTo(next, dir = 'forward') {
     setDirection(dir)
@@ -215,11 +225,21 @@ export default function App() {
     setSelectedRecipeIndex(0)
   }
 
+  function revokePreview() {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current)
+      previewUrlRef.current = null
+    }
+  }
+
   function pick(nextFile) {
     if (!nextFile) return
 
+    revokePreview()
+    const previewUrl = URL.createObjectURL(nextFile)
+    previewUrlRef.current = previewUrl
     setFile(nextFile)
-    setPreview(URL.createObjectURL(nextFile))
+    setPreview(previewUrl)
     setItems([])
     setDraft('')
     setError(null)
@@ -243,6 +263,15 @@ export default function App() {
       return
     }
 
+    const controller = new AbortController()
+    let timedOut = false
+    scanAbortRef.current?.abort()
+    scanAbortRef.current = controller
+    const timeoutId = window.setTimeout(() => {
+      timedOut = true
+      controller.abort()
+    }, REQUEST_TIMEOUT_MS)
+
     try {
       const formData = new FormData()
       formData.append('file', file)
@@ -250,6 +279,7 @@ export default function App() {
       const response = await fetch(`${API_URL}/predict`, {
         method: 'POST',
         body: formData,
+        signal: controller.signal,
       })
 
       if (!response.ok) {
@@ -260,8 +290,14 @@ export default function App() {
       setItems(cleanIngredients(data.ingredients ?? []))
       goTo('ingredients')
     } catch (scanError) {
-      setError(`Couldn't reach the model: ${scanError.message}`)
+      if (timedOut) {
+        setError("The model took too long to respond. Please try again.")
+      } else if (!controller.signal.aborted) {
+        setError(`Couldn't reach the model: ${scanError.message}`)
+      }
     } finally {
+      window.clearTimeout(timeoutId)
+      if (scanAbortRef.current === controller) scanAbortRef.current = null
       setLoading(false)
     }
   }
@@ -306,11 +342,21 @@ export default function App() {
       return
     }
 
+    const controller = new AbortController()
+    let timedOut = false
+    recipesAbortRef.current?.abort()
+    recipesAbortRef.current = controller
+    const timeoutId = window.setTimeout(() => {
+      timedOut = true
+      controller.abort()
+    }, REQUEST_TIMEOUT_MS)
+
     try {
       const response = await fetch(`${API_URL}/recipes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ingredients: items, cuisine }),
+        signal: controller.signal,
       })
 
       if (!response.ok) {
@@ -321,15 +367,25 @@ export default function App() {
       setRecipes(data.recipes ?? [])
       setSelectedRecipeIndex(0)
     } catch (recipesError) {
-      setRecipeError(`Couldn't generate recipes: ${recipesError.message}`)
-      // Send the user back to the ingredients screen so they can retry.
-      goTo('ingredients', 'back')
+      if (timedOut) {
+        setRecipeError("Recipe generation took too long. Please try again.")
+        goTo('ingredients', 'back')
+      } else if (!controller.signal.aborted) {
+        setRecipeError(`Couldn't generate recipes: ${recipesError.message}`)
+        // Send the user back to the ingredients screen so they can retry.
+        goTo('ingredients', 'back')
+      }
     } finally {
+      window.clearTimeout(timeoutId)
+      if (recipesAbortRef.current === controller) recipesAbortRef.current = null
       setRecipeLoading(false)
     }
   }
 
   function startOver() {
+    scanAbortRef.current?.abort()
+    recipesAbortRef.current?.abort()
+    revokePreview()
     setFile(null)
     setPreview(DEMO_MODE ? DEMO_IMAGE : null)
     setItems([])
@@ -344,35 +400,46 @@ export default function App() {
 
   return (
     <div className="page">
+      <a className="skipLink" href="#workflow">
+        Skip to workspace
+      </a>
       <div className="app">
         <header className="intro">
+          <div className="masthead">
+            <div className="wordmark">
+              <span className="wordmarkMark" aria-hidden="true">K</span>
+              <span>Kimchi</span>
+            </div>
+            <p className="edition">Ingredient reader · 01</p>
+          </div>
           <div className="introText">
-            <p className="eyebrow">AI kitchen assistant</p>
-            <h1>Kimchi Prototype</h1>
+            <p className="eyebrow">Cook from what you have</p>
+            <h1>Turn today&apos;s ingredients into dinner.</h1>
             <p className="tagline">
-              Photograph your ingredients and let the model turn them into recipes you can
-              actually cook tonight.
+              Photograph what&apos;s on the counter. We&apos;ll identify the ingredients, then give you
+              a few thoughtful ways to cook them.
             </p>
           </div>
         </header>
 
-        <nav className="stepper" aria-label="Progress">
-          {STEPS.map(([key, label], index) => {
-            const state =
-              index < activeStep ? 'done' : index === activeStep ? 'active' : 'upcoming'
-            return (
-              <div className={`step ${state}`} key={key}>
-                <span className="stepDot" aria-hidden="true">
-                  {state === 'done' ? <CheckIcon /> : index + 1}
-                </span>
-                <span className="stepLabel">{label}</span>
-                {index < STEPS.length - 1 && <span className="stepLine" aria-hidden="true" />}
-              </div>
-            )
-          })}
-        </nav>
+        <main id="workflow">
+          <nav className="stepper" aria-label="Progress">
+            {STEPS.map(([key, label], index) => {
+              const state =
+                index < activeStep ? 'done' : index === activeStep ? 'active' : 'upcoming'
+              return (
+                <div className={`step ${state}`} key={key}>
+                  <span className="stepDot" aria-hidden="true">
+                    {state === 'done' ? <CheckIcon /> : `0${index + 1}`}
+                  </span>
+                  <span className="stepLabel">{label}</span>
+                  {index < STEPS.length - 1 && <span className="stepLine" aria-hidden="true" />}
+                </div>
+              )
+            })}
+          </nav>
 
-        <div className={`phaseWrap ${direction}`} key={phase}>
+          <div className={`phaseWrap ${direction}`} key={phase}>
           {phase === 'upload' && (
             <section className="card uploadCard" aria-label="Upload ingredients">
               <div className="sectionHead">
@@ -382,25 +449,32 @@ export default function App() {
                 </p>
               </div>
 
-              <label className="dropzone">
-                {preview ? (
-                  <img src={preview || '/placeholder.svg'} alt="Selected ingredients" />
-                ) : (
-                  <span className="dropzoneEmpty">
-                    <span className="dropzoneIcon" aria-hidden="true">
-                      <CameraIcon />
+              <div className="uploadWorkspace">
+                <label className="dropzone">
+                  {preview ? (
+                    <img src={preview || '/placeholder.svg'} alt="Selected ingredients" />
+                  ) : (
+                    <span className="dropzoneEmpty">
+                      <span className="dropzoneIcon" aria-hidden="true">
+                        <CameraIcon />
+                      </span>
+                      <span className="dropzoneTitle">Choose a photo</span>
+                      <span className="dropzoneHint">or drag an image here</span>
                     </span>
-                    <span className="dropzoneTitle">Click to choose a photo</span>
-                    <span className="dropzoneHint">or drag an image of your ingredients here</span>
-                  </span>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={(event) => pick(event.target.files?.[0])}
-                />
-              </label>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(event) => pick(event.target.files?.[0])}
+                  />
+                </label>
+                <aside className="uploadGuide" aria-label="Photo guidelines">
+                  <p className="guideKicker">For a better read</p>
+                  <p>Lay ingredients out with a little space between them. Daylight helps.</p>
+                  <p>We&apos;ll always let you correct the list before recipes are made.</p>
+                </aside>
+              </div>
 
               <div className="actions">
                 <label className="button">
@@ -477,7 +551,7 @@ export default function App() {
                         aria-label={`Remove ${ingredient}`}
                         onClick={() => removeItem(ingredient)}
                       >
-                        ×
+                        <CloseIcon />
                       </button>
                     </li>
                   ))}
@@ -488,6 +562,7 @@ export default function App() {
                 <input
                   type="text"
                   value={draft}
+                  aria-label="Add an ingredient"
                   placeholder="Add an ingredient"
                   onChange={(event) => setDraft(event.target.value)}
                 />
@@ -671,7 +746,8 @@ export default function App() {
               )}
             </section>
           )}
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   )
@@ -790,6 +866,14 @@ function CheckIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="m5 13 4 4L19 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function CloseIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="m7 7 10 10M17 7 7 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   )
 }

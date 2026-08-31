@@ -2,7 +2,7 @@
 
 **Photograph your ingredients. Get recipes.**
 
-KimchiTest is an end-to-end ML portfolio project: a fine-tuned vision-language model detects food ingredients from a photo, and a downstream LLM step turns that ingredient list into three ranked, detailed recipe options.
+Kimchi is an end-to-end ML portfolio project: a fine-tuned vision-language model detects food ingredients from a photo, and a downstream LLM step turns that ingredient list into three ranked, detailed recipe options.
 
 ## How it works
 
@@ -36,12 +36,17 @@ The original pitch was "photograph your fridge, get recipes." That's a much hard
 ## Project structure
 
 ```
-kimchitest/
-├── README.md                    
+kimchi/
+├── .github/workflows/ci.yml      # backend tests, frontend lint and build
+├── .nvmrc                        # Node 22
+├── LICENSE
+├── README.md
 ├── be/
 │   ├── README.md                # backend documentation
+│   ├── requirements.txt         # pinned Python runtime dependencies
+│   ├── parsing.py               # tolerant VLM-output parser
 │   ├── server.py                # FastAPI inference + recipe server
-│   └── .venv/                   # backend virtualenv (one level up in practice)
+│   └── tests/                   # parser, image, and recipe validation tests
 └── fe/
     ├── src/
     │   ├── App.jsx               # three-phase UI: scan, review, cook
@@ -57,7 +62,7 @@ kimchitest/
 | Layer | Choice |
 |---|---|
 | Vision model | SmolVLM2-500M-Video-Instruct, fine-tuned with LoRA (TRL `SFTTrainer`), merged for inference |
-| Model host | Hugging Face Hub — `LongGrainRice/kimchi-test` |
+| Model host | [Hugging Face Hub — `LongGrainRice/kimchi-test`](https://huggingface.co/LongGrainRice/kimchi-test) |
 | Inference server | FastAPI + uvicorn, local (cuda/mps/cpu auto-detected) |
 | Recipe generation | OpenAI API, prompted directly on the confirmed ingredient list |
 
@@ -71,14 +76,16 @@ The frontend and backend must both run over **plain HTTP on localhost**. Browser
 export OPENAI_API_KEY=sk-...
 ```
 
-You can also put this in `be/.env`. It must be set before starting `server.py`, since `/recipes` is called server-side.
+You can also put this in `be/.env`. It must be set before starting `be.server`, since `/recipes` is called server-side.
 
 **2. Start the backend**
 
 ```bash
-cd be
-source ../.venv/bin/activate
-uvicorn server:app --port 8000
+# Run from the repository root.
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -r be/requirements.txt
+uvicorn be.server:app --host 127.0.0.1 --port 8000
 ```
 
 Confirm it's up: `http://localhost:8000/health` should return the device it loaded on (`cuda`, `mps`, or `cpu`) and the model path.
@@ -87,7 +94,8 @@ Confirm it's up: `http://localhost:8000/health` should return the device it load
 
 ```bash
 cd fe
-npm install
+nvm use
+npm ci
 cp .env.example .env      # set VITE_API_URL if the backend isn't on :8000
 npm run dev
 ```
@@ -98,10 +106,10 @@ For a backend-free walkthrough of the frontend, set `VITE_DEMO=1` in `fe/.env` o
 
 ## Prototype scope
 
-The model recognizes **51 ingredient classes**. For a fair demonstration of model quality, arrange the slab using items from that vocabulary — the model is genuinely strong here (~82% recall). Ingredients outside the trained vocabulary (spices, flour, sugar, etc.) will sometimes cause the model to substitute a similar-sounding known ingredient rather than say "I don't recognize this," since it was never taught an "unknown" option. See the backend README for more on this behavior and how the roadmap addresses it.
+The V2 model recognizes **approximately 353 ingredient classes**: the original 51-class set plus a 316-class dataset, with 14 normalized overlaps. For representative demos, arrange the slab using items from the [published V2 model vocabulary](https://huggingface.co/LongGrainRice/kimchi-test). Its vocabulary is still fixed, so items outside it may be confused with visually similar known ingredients rather than labeled as unknown. This repository does **not** yet include a versioned V2 evaluation harness or report, so it intentionally makes no standalone recall claim. See the backend README for more on current behavior and the roadmap.
 
 ## Roadmap (not in current scope)
 
 - **On-device deployment**: ONNX Runtime Mobile for iOS/Android, so ingredient detection runs without a server round-trip.
-- **Open-vocabulary robustness**: a staged pipeline, a strong single-ingredient classifier (EfficientNet/ViT/CLIP-SigLIP), region proposals (SAM/SAM2), crop-and-classify, then NMS/normalize before recipe ranking. Classifying labeled regions rather than free-generating a list structurally avoids the over-prediction failure mode seen in the current single-shot VLM approach.
+- **Open-vocabulary robustness**: a staged pipeline, a strong single-ingredient classifier (EfficientNet/ViT/CLIP-SigLIP), region proposals (SAM/SAM2), crop-and-classify, then NMS/normalize before recipe ranking. V2's 353-class expansion reduces V1's out-of-vocabulary failure mode, but a region-based classifier is still the path to explicit unknown-item handling.
 - **Fridge-photo support**: extending beyond the slab setup to cluttered, real-world fridge shots.

@@ -1,6 +1,6 @@
 # Kimchi Prototype Frontend
 
-React frontend for the local KimchiTest pipeline. It runs as a three-step flow:
+React frontend for the local Kimchi pipeline. It runs as a three-step flow:
 
 1. **Scan**: pick an ingredient photo from disk or capture one with the device camera.
 2. **Review**: edit the detected ingredient chips and choose a cuisine.
@@ -29,13 +29,14 @@ VITE_DEMO=0
 ## Run Locally
 
 ```bash
-npm install
+nvm use            # Node 22 (or Node ^20.19.0 / >=22.12.0) is required by Vite 8.
+npm ci
 npm run dev
 ```
 
 The app is served at `http://localhost:5173`.
 
-The backend (`server.py`) must be running on `http://localhost:8000` first. If it is running somewhere else, adjust `VITE_API_URL` in `.env`.
+The backend (`be.server`) must be running on `http://localhost:8000` first. If it is running somewhere else, adjust `VITE_API_URL` in `.env`.
 
 Recipe generation uses `OPENAI_API_KEY` on the backend only. Do not put API keys in any `VITE_*` env var because those values are bundled into browser code.
 

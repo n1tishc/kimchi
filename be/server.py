@@ -1,33 +1,53 @@
 """
-KimchiTest local inference and recipe server.
+Kimchi local inference and recipe server.
 """
 
 import io
 import json
 import os
-import re
+import warnings
+from contextlib import asynccontextmanager
+from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional
 
 import torch
 from openai import OpenAI, OpenAIError
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from transformers import AutoProcessor, AutoModelForImageTextToText
 from transformers import logging as hf_logging
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
+from be.parsing import clean, extract_items
+
+load_dotenv(Path(__file__).with_name(".env"))
 hf_logging.set_verbosity_error()
 
-MODEL_PATH = "LongGrainRice/kimchi-test"
-RECIPE_MODEL = "gpt-4.1-mini"
+MODEL_PATH = os.getenv("MODEL_PATH", "LongGrainRice/kimchi-test")
+RECIPE_MODEL = os.getenv("RECIPE_MODEL", "gpt-4.1-mini")
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
+    if origin.strip()
+]
+# Vite moves to the next free port when its preferred port is occupied. Permit
+# localhost development servers on any port without opening CORS to non-local
+# origins; deployed frontends must still be named in CORS_ORIGINS.
+LOCAL_DEV_ORIGIN_REGEX = r"^https?://(?:localhost|127\.0\.0\.1)(?::\d+)?$"
+CORS_ORIGIN_REGEX = os.getenv("CORS_ORIGIN_REGEX", LOCAL_DEV_ORIGIN_REGEX)
+MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", 10 * 1024 * 1024))
+MAX_IMAGE_PIXELS = int(os.getenv("MAX_IMAGE_PIXELS", 40_000_000))
+INCLUDE_RAW_OUTPUT = os.getenv("INCLUDE_RAW_OUTPUT", "false").lower() == "true"
+Image.MAX_IMAGE_PIXELS = MAX_IMAGE_PIXELS
+warnings.simplefilter("error", Image.DecompressionBombWarning)
 
 # Must match the exact prompt with training
 INSTRUCTION = (
-    "List all the food ingredients visible in this image. "
-    "Respond with ONLY a JSON array of lowercase ingredient names."
+    "You are a food recognition assistant. List every food ingredient in this image. "
+    'Respond ONLY with a JSON array of lowercase strings, e.g. ["milk", "eggs", "tomato"].'
 )
 
 if torch.cuda.is_available():
@@ -40,49 +60,20 @@ else:
     DEVICE = "cpu"
     DTYPE = torch.float32
 
-# processor = AutoProcessor.from_pretrained(MODEL_PATH)
-processor = AutoProcessor.from_pretrained(MODEL_PATH, use_fast=False)
-model = AutoModelForImageTextToText.from_pretrained(
-    MODEL_PATH, torch_dtype=DTYPE, _attn_implementation="sdpa",
-).to(DEVICE)
-model.eval()
-print(f"Loaded {MODEL_PATH} on {DEVICE} as {DTYPE}")
-
-
-# parsing helpers
-def _coerce(obj):
-    if isinstance(obj, dict):
-        for v in obj.values():
-            if isinstance(v, list):
-                return v
-        return list(obj.keys())
-    if isinstance(obj, list):
-        return obj
-    return [str(obj)]
-
-def _extract_items(text: str):
-    for parse in (text, text.strip()):
-        try:
-            return _coerce(json.loads(parse))
-        except Exception:
-            pass
-    for pattern in (r"\{.*\}", r"\[.*\]"):
-        m = re.search(pattern, text, re.DOTALL)
-        if m:
-            try:
-                return _coerce(json.loads(m.group(0)))
-            except Exception:
-                continue
-    return [t.strip(" \"'[]") for t in text.split(",") if t.strip(" \"'[]")]
-
-def _clean(items):
-    out = [str(it).strip().lower() for it in items if str(it).strip()]
-    return sorted(set(out))           # dedupe baked in
+def load_model():
+    """Load the processor and merged VLM once during application startup."""
+    processor = AutoProcessor.from_pretrained(MODEL_PATH, use_fast=False)
+    model = AutoModelForImageTextToText.from_pretrained(
+        MODEL_PATH, torch_dtype=DTYPE, _attn_implementation="sdpa",
+    ).to(DEVICE)
+    model.eval()
+    print(f"Loaded {MODEL_PATH} on {DEVICE} as {DTYPE}")
+    return processor, model
 
 
 class RecipeRequest(BaseModel):
-    ingredients: List[str]
-    cuisine: Optional[str] = "any"
+    ingredients: List[str] = Field(min_length=1, max_length=64)
+    cuisine: Optional[str] = Field(default="any", max_length=64)
 
 
 RECIPE_SYSTEM_PROMPT = """
@@ -93,7 +84,7 @@ no preamble, and no commentary. The JSON object must have exactly this top-level
 shape: {"recipes":[...]} with exactly 3 recipe objects.
 
 The user gives you detected ingredients from a closed-vocabulary vision model.
-The model can recognize only 51 ingredient classes and will never detect pantry
+The model can recognize approximately 353 ingredient classes and will never detect pantry
 staples like salt, pepper, oil, butter, water, flour, sugar, or dried herbs and
 spices. Do not imply pantry staples were detected.
 
@@ -202,8 +193,6 @@ RECIPE_RESPONSE_SCHEMA = {
     "required": ["recipes"],
 }
 
-load_dotenv(Path(__file__).with_name(".env"))
-
 recipe_client = None
 
 
@@ -213,7 +202,7 @@ def _get_recipe_client():
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise HTTPException(500, "OPENAI_API_KEY is not set")
-        recipe_client = OpenAI(api_key=api_key)
+        recipe_client = OpenAI(api_key=api_key, timeout=30.0, max_retries=1)
     return recipe_client
 
 
@@ -262,46 +251,9 @@ def _parse_recipe_response(text):
     return recipes
 
 
-@torch.inference_mode()
-def predict(image: Image.Image):
-    image = image.convert("RGB")
-    messages = [{
-        "role": "user",
-        "content": [{"type": "image"}, {"type": "text", "text": INSTRUCTION}],
-    }]
-    prompt = processor.apply_chat_template(messages, add_generation_prompt=True)
-    inputs = processor(text=prompt, images=[image], return_tensors="pt").to(DEVICE)
-    gen = model.generate(**inputs, max_new_tokens=256, do_sample=False)
-    raw = processor.batch_decode(
-        gen[:, inputs["input_ids"].shape[1]:], skip_special_tokens=True
-    )[0]
-    return {"ingredients": _clean(_extract_items(raw)), "raw": raw}
-
-
-# ── app ───────────────────────────────────────────────────────────────────
-app = FastAPI(title="KimchiTest")
-app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
-)
-
-@app.get("/health")
-def health():
-    return {"ok": True, "device": DEVICE, "model": MODEL_PATH}
-
-@app.post("/predict")
-async def predict_endpoint(file: UploadFile = File(...)):
-    data = await file.read()
-    image = Image.open(io.BytesIO(data))
-    return predict(image)
-
-@app.post("/recipes")
-def recipes_endpoint(req: RecipeRequest):
-    items = [item.strip().lower() for item in req.ingredients if item.strip()]
-    items = sorted(set(items))
-    if not items:
-        raise HTTPException(400, "ingredients is empty")
-
-    cuisine = (req.cuisine or "any").strip().lower()
+@lru_cache(maxsize=128)
+def _generate_recipes(items: tuple[str, ...], cuisine: str):
+    """Generate and cache a successful recipe response for one normalized request."""
     prompt = _recipe_prompt(items, cuisine)
 
     try:
@@ -323,9 +275,89 @@ def recipes_endpoint(req: RecipeRequest):
     except OpenAIError as exc:
         raise HTTPException(502, f"recipe model request failed: {exc}") from exc
 
-    return {"recipes": _parse_recipe_response(response.output_text)}
+    return _parse_recipe_response(response.output_text)
+
+
+@torch.inference_mode()
+def predict(image: Image.Image, processor, model):
+    image = image.convert("RGB")
+    messages = [{
+        "role": "user",
+        "content": [{"type": "image"}, {"type": "text", "text": INSTRUCTION}],
+    }]
+    prompt = processor.apply_chat_template(messages, add_generation_prompt=True)
+    inputs = processor(text=prompt, images=[image], return_tensors="pt").to(DEVICE)
+    gen = model.generate(**inputs, max_new_tokens=128, do_sample=False)
+    raw = processor.batch_decode(
+        gen[:, inputs["input_ids"].shape[1]:], skip_special_tokens=True
+    )[0]
+    result = {"ingredients": clean(extract_items(raw))}
+    if INCLUDE_RAW_OUTPUT:
+        result["raw"] = raw
+    return result
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    processor, model = load_model()
+    app.state.processor = processor
+    app.state.model = model
+    yield
+
+
+# ── app ───────────────────────────────────────────────────────────────────
+app = FastAPI(title="Kimchi", lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_origin_regex=CORS_ORIGIN_REGEX,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
+
+@app.get("/health")
+def health():
+    return {"ok": True, "device": DEVICE, "model": MODEL_PATH}
+
+def decode_image(data: bytes) -> Image.Image:
+    """Decode a complete, bounded image upload before model inference."""
+    try:
+        with Image.open(io.BytesIO(data)) as opened_image:
+            opened_image.load()
+            return opened_image.copy()
+    except (
+        Image.DecompressionBombError,
+        Image.DecompressionBombWarning,
+        UnidentifiedImageError,
+        OSError,
+        ValueError,
+    ) as exc:
+        raise HTTPException(400, "file is not a valid, safe image") from exc
+
+
+@app.post("/predict")
+def predict_endpoint(request: Request, file: UploadFile = File(...)):
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(415, "file must be an image")
+
+    data = file.file.read(MAX_UPLOAD_BYTES + 1)
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, f"image must be at most {MAX_UPLOAD_BYTES} bytes")
+
+    image = decode_image(data)
+    return predict(image, request.app.state.processor, request.app.state.model)
+
+@app.post("/recipes")
+def recipes_endpoint(req: RecipeRequest):
+    items = [item.strip().lower() for item in req.ingredients if item.strip()]
+    items = sorted(set(items))
+    if not items:
+        raise HTTPException(400, "ingredients is empty")
+
+    cuisine = (req.cuisine or "any").strip().lower()
+    return {"recipes": _generate_recipes(tuple(items), cuisine)}
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
