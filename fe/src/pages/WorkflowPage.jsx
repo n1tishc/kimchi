@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { ArrowLeftIcon } from '../icons/ArrowLeftIcon'
 import { ScanIcon } from '../icons/ScanIcon'
 import { API_URL, REQUEST_TIMEOUT_MS } from '../lib/api'
 import { PHASES, STEPS } from '../lib/constants'
@@ -7,6 +6,7 @@ import { DEMO_IMAGE, DEMO_ITEMS, DEMO_MODE, DEMO_RECIPES } from '../lib/demo'
 import { useImageUpload } from '../hooks/useImageUpload'
 import { useRecipes } from '../hooks/useRecipes'
 import { useScan } from '../hooks/useScan'
+import { BackLink } from '../components/ui/BackLink'
 import { Button } from '../components/ui/Button'
 import { IngredientEditor } from '../components/workflow/IngredientEditor'
 import { RecipeDetail } from '../components/workflow/RecipeDetail'
@@ -15,12 +15,11 @@ import { RecipeSkeleton } from '../components/workflow/RecipeSkeleton'
 import { Stepper } from '../components/workflow/Stepper'
 import { UploadCard } from '../components/workflow/UploadCard'
 
-export function WorkflowPage({ hidden, onStartOver }) {
+export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) {
   const [phase, setPhase] = useState('upload')
   const [direction, setDirection] = useState('forward')
   const [items, setItems] = useState([])
   const [draft, setDraft] = useState('')
-  const [cuisine, setCuisine] = useState('any')
 
   const imageUpload = useImageUpload({ demoMode: DEMO_MODE, demoImage: DEMO_IMAGE })
   const scan = useScan({
@@ -43,6 +42,9 @@ export function WorkflowPage({ hidden, onStartOver }) {
   }
 
   async function handleScan() {
+    setItems([])
+    setDraft('')
+    recipesHook.reset()
     const result = await scan.scan(imageUpload.file)
     if (result) {
       setItems(result)
@@ -76,7 +78,7 @@ export function WorkflowPage({ hidden, onStartOver }) {
   }
 
   function changeCuisine(nextCuisine) {
-    setCuisine(nextCuisine)
+    onCuisineChange(nextCuisine)
     recipesHook.reset()
   }
 
@@ -150,14 +152,7 @@ export function WorkflowPage({ hidden, onStartOver }) {
         {phase === 'recipes' && (
           <section className="grid gap-[18px]" aria-label="Recipe suggestions">
             <div className="grid grid-cols-[auto_minmax(0,1fr)] max-[480px]:grid-cols-1 items-start gap-4 max-[480px]:gap-3 pt-4">
-              <button
-                className="inline-flex min-h-[34px] items-center gap-[5px] p-0 text-ink-soft bg-transparent border-0 cursor-pointer font-mono text-[.68rem] tracking-[.02em] uppercase transition-colors duration-150 hover:text-tomato focus-visible:outline-3 focus-visible:outline-cobalt focus-visible:outline-offset-4"
-                type="button"
-                onClick={() => goTo('ingredients', 'back')}
-              >
-                <ArrowLeftIcon />
-                Ingredients
-              </button>
+              <BackLink onClick={() => goTo('ingredients', 'back')}>Ingredients</BackLink>
               <div className="min-w-0">
                 <h2 className="m-0 font-serif text-[clamp(2.15rem,4vw,3rem)] font-medium tracking-[-.05em] leading-[.95]">
                   Pick tonight&apos;s plot twist.

@@ -2,6 +2,17 @@ import { Badge } from '../ui/Badge'
 import { Card } from '../ui/Card'
 import { INGREDIENT_TYPE_LABELS, ingredientType } from '../../lib/constants'
 
+function RecipeSection({ title, children }) {
+  return (
+    <section className="pt-7">
+      <h3 className="mt-0 mb-[13px] text-tomato font-mono text-[.7rem] font-medium tracking-[.09em] uppercase">
+        {title}
+      </h3>
+      {children}
+    </section>
+  )
+}
+
 export function RecipeDetail({ recipe }) {
   return (
     <Card as="article" className="p-[clamp(24px,5vw,48px)] max-[480px]:p-[22px]">
@@ -24,10 +35,7 @@ export function RecipeDetail({ recipe }) {
       </header>
 
       {recipe.ingredients?.length > 0 && (
-        <section className="pt-7">
-          <h3 className="mt-0 mb-[13px] text-tomato font-mono text-[.7rem] font-medium tracking-[.09em] uppercase">
-            Ingredients
-          </h3>
+        <RecipeSection title="Ingredients">
           <ul className="m-0 p-0 list-none">
             {recipe.ingredients.map((ingredient, index) => {
               const type = ingredientType(ingredient.type)
@@ -48,14 +56,11 @@ export function RecipeDetail({ recipe }) {
               )
             })}
           </ul>
-        </section>
+        </RecipeSection>
       )}
 
       {recipe.equipment?.length > 0 && (
-        <section className="pt-7">
-          <h3 className="mt-0 mb-[13px] text-tomato font-mono text-[.7rem] font-medium tracking-[.09em] uppercase">
-            Equipment
-          </h3>
+        <RecipeSection title="Equipment">
           <ul className="flex flex-wrap gap-2 m-0 p-0 list-none">
             {recipe.equipment.map((item) => (
               <li className="px-[9px] py-[7px] border border-line text-ink-soft text-[.83rem] capitalize" key={item}>
@@ -63,14 +68,11 @@ export function RecipeDetail({ recipe }) {
               </li>
             ))}
           </ul>
-        </section>
+        </RecipeSection>
       )}
 
       {recipe.steps?.length > 0 && (
-        <section className="pt-7">
-          <h3 className="mt-0 mb-[13px] text-tomato font-mono text-[.7rem] font-medium tracking-[.09em] uppercase">
-            Steps
-          </h3>
+        <RecipeSection title="Steps">
           <ol className="recipe-steps grid gap-5 m-0 p-0 list-none">
             {recipe.steps.map((step, index) => (
               <li className="relative min-h-[30px] pl-[46px]" key={step.n || index}>
@@ -83,14 +85,11 @@ export function RecipeDetail({ recipe }) {
               </li>
             ))}
           </ol>
-        </section>
+        </RecipeSection>
       )}
 
       {recipe.chef_tips?.length > 0 && (
-        <section className="pt-7">
-          <h3 className="mt-0 mb-[13px] text-tomato font-mono text-[.7rem] font-medium tracking-[.09em] uppercase">
-            Chef tips
-          </h3>
+        <RecipeSection title="Chef tips">
           <ul className="compact-list grid gap-2 m-0 p-0 list-none">
             {recipe.chef_tips.map((tip) => (
               <li className="relative pl-[15px] text-ink-soft text-[.92rem] leading-[1.5]" key={tip}>
@@ -98,7 +97,7 @@ export function RecipeDetail({ recipe }) {
               </li>
             ))}
           </ul>
-        </section>
+        </RecipeSection>
       )}
 
       {recipe.level_up && (

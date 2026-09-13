@@ -3,6 +3,7 @@ import { ScanIcon } from '../../icons/ScanIcon'
 import { UploadIcon } from '../../icons/UploadIcon'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
+import { ErrorNote } from '../ui/ErrorNote'
 import { Spinner } from '../ui/Spinner'
 
 export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, error }) {
@@ -101,11 +102,7 @@ export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, er
         </div>
       )}
 
-      {error && (
-        <p className="m-0 px-3.5 py-3 text-danger bg-danger-wash border-l-4 border-danger text-[.9rem] leading-[1.5]">
-          {error}
-        </p>
-      )}
+      {error && <ErrorNote>{error}</ErrorNote>}
     </Card>
   )
 }

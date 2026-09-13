@@ -1,9 +1,10 @@
-import { ArrowLeftIcon } from '../../icons/ArrowLeftIcon'
 import { ChevronIcon } from '../../icons/ChevronIcon'
 import { CUISINES } from '../../lib/constants'
+import { BackLink } from '../ui/BackLink'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
 import { Chip } from '../ui/Chip'
+import { ErrorNote } from '../ui/ErrorNote'
 import { Spinner } from '../ui/Spinner'
 
 export function IngredientEditor({
@@ -22,14 +23,7 @@ export function IngredientEditor({
   return (
     <Card as="section" className="grid gap-[21px] p-[clamp(22px,4vw,38px)] max-[480px]:p-[22px]" aria-label="Detected ingredients">
       <div className="grid grid-cols-[auto_minmax(0,1fr)] max-[480px]:grid-cols-1 items-start gap-4 max-[480px]:gap-3">
-        <button
-          className="inline-flex min-h-[34px] items-center gap-[5px] p-0 text-ink-soft bg-transparent border-0 cursor-pointer font-mono text-[.68rem] tracking-[.02em] uppercase transition-colors duration-150 hover:text-tomato focus-visible:outline-3 focus-visible:outline-cobalt focus-visible:outline-offset-4"
-          type="button"
-          onClick={onBack}
-        >
-          <ArrowLeftIcon />
-          Photo
-        </button>
+        <BackLink onClick={onBack}>Photo</BackLink>
         <div className="min-w-0">
           <h2 className="m-0 font-serif text-[clamp(2.15rem,4vw,3rem)] font-medium tracking-[-.05em] leading-[.95]">
             {items.length} ingredient{items.length !== 1 ? 's' : ''} found
@@ -100,11 +94,7 @@ export function IngredientEditor({
         </Button>
       </div>
 
-      {recipeError && (
-        <p className="m-0 px-3.5 py-3 text-danger bg-danger-wash border-l-4 border-danger text-[.9rem] leading-[1.5]">
-          {recipeError}
-        </p>
-      )}
+      {recipeError && <ErrorNote>{recipeError}</ErrorNote>}
     </Card>
   )
 }

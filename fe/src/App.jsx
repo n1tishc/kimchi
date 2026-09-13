@@ -7,6 +7,9 @@ import { WorkflowPage } from './pages/WorkflowPage'
 export default function App() {
   const [view, setView] = useState('home')
   const [workflowKey, setWorkflowKey] = useState(0)
+  // Lifted out of WorkflowPage so a "New dish" remount resets the rest of the
+  // workflow but leaves the cuisine choice in place, matching the original.
+  const [cuisine, setCuisine] = useState('any')
 
   function goHome() {
     setView('home')
@@ -37,7 +40,13 @@ export default function App() {
       <div className="w-[min(100%-48px,1120px)] max-[760px]:w-[min(100%-28px,1120px)] mx-auto">
         <Header view={view} onGoHome={goHome} onPrimaryAction={view === 'home' ? beginCooking : startOver} />
         <HomePage hidden={view !== 'home'} onStartCooking={beginCooking} />
-        <WorkflowPage key={workflowKey} hidden={view !== 'workflow'} onStartOver={startOver} />
+        <WorkflowPage
+          key={workflowKey}
+          hidden={view !== 'workflow'}
+          onStartOver={startOver}
+          cuisine={cuisine}
+          onCuisineChange={setCuisine}
+        />
       </div>
     </div>
   )

@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { errorMessage } from '../lib/api'
-
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
+import { wait } from '../lib/demo'
 
 function cleanIngredients(values) {
   return [
