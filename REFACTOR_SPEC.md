@@ -235,7 +235,7 @@ Each slice is a **shippable vertical increment** — it can be merged and deploy
 | [5. Recipe Detail Redesign](refactor-slices/05-recipe-detail.md) | Make the recipe view scannable, breathable, kitchen-usable | Slice 2 | ✅ Done |
 | [6. Dark Mode](refactor-slices/06-dark-mode.md) | Theme toggle with system preference detection | Slice 2 | ✅ Done |
 | [7. Upload Zone Drag-and-Drop Fix](refactor-slices/07-drag-drop.md) | Wire up the drag handlers the copy already promises | — | ✅ Done |
-| [8. Mobile Cooking Mode](refactor-slices/08-cooking-mode.md) | Step-by-step full-screen cooking view on mobile | Slice 5 | Not started |
+| [8. Mobile Cooking Mode](refactor-slices/08-cooking-mode.md) | Step-by-step full-screen cooking view on mobile | Slice 5 | ✅ Done |
 
 ---
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Badge } from '../ui/Badge'
+import { Button } from '../ui/Button'
 import { Callout } from '../ui/Callout'
 import { Card } from '../ui/Card'
 import { ClockIcon } from '../../icons/ClockIcon'
@@ -8,6 +9,7 @@ import { NoteIcon } from '../../icons/NoteIcon'
 import { ServingsIcon } from '../../icons/ServingsIcon'
 import { SparkIcon } from '../../icons/SparkIcon'
 import { INGREDIENT_TYPE_LABELS, ingredientType } from '../../lib/constants'
+import { CookingMode } from './CookingMode'
 
 const INGREDIENT_GROUPS = ['detected', 'pantry', 'extra']
 
@@ -31,6 +33,8 @@ function MetaPill({ icon, children }) {
 
 export function RecipeDetail({ recipe }) {
   const [completedSteps, setCompletedSteps] = useState(() => new Array(recipe.steps?.length ?? 0).fill(false))
+  const [cookingModeOpen, setCookingModeOpen] = useState(false)
+  const hasSteps = recipe.steps?.length > 0
 
   function toggleStep(index) {
     setCompletedSteps((current) => current.map((done, i) => (i === index ? !done : done)))
@@ -154,6 +158,23 @@ export function RecipeDetail({ recipe }) {
             {recipe.level_up}
           </Callout>
         </RecipeSection>
+      )}
+
+      {hasSteps && (
+        <div className="md:hidden sticky bottom-0 -mx-[clamp(24px,5vw,48px)] max-[480px]:-mx-[22px] mt-8 px-[clamp(24px,5vw,48px)] max-[480px]:px-[22px] pt-3 pb-[max(12px,env(safe-area-inset-bottom))] bg-surface border-t border-line">
+          <Button variant="primary" className="w-full" onClick={() => setCookingModeOpen(true)}>
+            Start cooking
+          </Button>
+        </div>
+      )}
+
+      {hasSteps && cookingModeOpen && (
+        <CookingMode
+          recipe={recipe}
+          completedSteps={completedSteps}
+          onToggleStep={toggleStep}
+          onExit={() => setCookingModeOpen(false)}
+        />
       )}
     </Card>
   )
