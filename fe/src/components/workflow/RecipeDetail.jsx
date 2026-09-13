@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { Callout } from '../ui/Callout'
@@ -31,14 +32,40 @@ function MetaPill({ icon, children }) {
   )
 }
 
-export function RecipeDetail({ recipe }) {
+export function RecipeDetail({ recipe, active = true }) {
   const [completedSteps, setCompletedSteps] = useState(() => new Array(recipe.steps?.length ?? 0).fill(false))
   const [cookingModeOpen, setCookingModeOpen] = useState(false)
   const hasSteps = recipe.steps?.length > 0
+  const cookingTriggerRef = useRef(null)
 
   function toggleStep(index) {
     setCompletedSteps((current) => current.map((done, i) => (i === index ? !done : done)))
   }
+
+  // Captured here (not read back from document.activeElement inside CookingMode)
+  // because applying `inert` to this button on open blurs it synchronously, before
+  // CookingMode's own mount effect would ever get a chance to see it as focused.
+  function openCookingMode(event) {
+    cookingTriggerRef.current = event.currentTarget
+    setCookingModeOpen(true)
+  }
+
+  // Restoring focus has to wait for this effect (post-commit), not happen inline in
+  // the exit handler — `inert` is still applied to the trigger until React actually
+  // re-renders, so an immediate .focus() call there would silently no-op.
+  useEffect(() => {
+    if (cookingModeOpen) return
+    const trigger = cookingTriggerRef.current
+    if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus()
+    cookingTriggerRef.current = null
+  }, [cookingModeOpen])
+
+  // `active` mirrors WorkflowPage's `hidden` prop: App.jsx never unmounts WorkflowPage
+  // when the user navigates home, only toggles `hidden` on it. Both portals below render
+  // outside that hidden <main>, so without this they'd stay visible over the home page.
+  useEffect(() => {
+    if (!active) setCookingModeOpen(false)
+  }, [active])
 
   return (
     <Card as="article" className="p-[clamp(24px,5vw,48px)] max-[480px]:p-[22px]">
@@ -161,14 +188,31 @@ export function RecipeDetail({ recipe }) {
       )}
 
       {hasSteps && (
-        <div className="md:hidden sticky bottom-0 -mx-[clamp(24px,5vw,48px)] max-[480px]:-mx-[22px] mt-8 px-[clamp(24px,5vw,48px)] max-[480px]:px-[22px] pt-3 pb-[max(12px,env(safe-area-inset-bottom))] bg-surface border-t border-line">
-          <Button variant="primary" className="w-full" onClick={() => setCookingModeOpen(true)}>
-            Start cooking
-          </Button>
+        // Reserves the scroll space the fixed bar below occupies, so it never covers
+        // the page's own trailing content ("Scan new ingredients" in WorkflowPage).
+        <div className="md:hidden mt-8 pt-3 pb-[max(12px,env(safe-area-inset-bottom))]" aria-hidden="true">
+          <div className="min-h-12" />
         </div>
       )}
 
-      {hasSteps && cookingModeOpen && (
+      {hasSteps &&
+        active &&
+        createPortal(
+          // `inert` (not unmounting) while Cooking Mode is open: it sits fully behind that
+          // full-screen overlay either way, but staying mounted keeps this exact DOM node
+          // around for the focus-restore effect above to hand focus back to.
+          <div
+            className="md:hidden fixed inset-x-0 bottom-0 z-40 px-3.5 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] bg-surface border-t border-line"
+            inert={cookingModeOpen || undefined}
+          >
+            <Button variant="primary" className="w-full" onClick={openCookingMode}>
+              Start cooking
+            </Button>
+          </div>,
+          document.body,
+        )}
+
+      {hasSteps && active && cookingModeOpen && (
         <CookingMode
           recipe={recipe}
           completedSteps={completedSteps}

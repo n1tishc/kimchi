@@ -15,6 +15,7 @@ export function CookingMode({ recipe, completedSteps, onToggleStep, onExit }) {
   const [stepIndex, setStepIndex] = useState(0)
   const touchStartRef = useRef(null)
   const wakeLockRef = useRef(null)
+  const exitButtonRef = useRef(null)
 
   const step = steps[stepIndex]
   const stepNumber = step.n ?? stepIndex + 1
@@ -44,6 +45,11 @@ export function CookingMode({ recipe, completedSteps, onToggleStep, onExit }) {
           sentinel.release()
           return
         }
+        // The sentinel stays truthy after an OS/tab-hide auto-release, so the
+        // visibilitychange handler below needs this to know when to re-request.
+        sentinel.addEventListener('release', () => {
+          if (wakeLockRef.current === sentinel) wakeLockRef.current = null
+        })
         wakeLockRef.current = sentinel
       } catch {
         // Denied, unsupported, or backgrounded at request time — cooking mode still works, the screen may just dim.
@@ -84,6 +90,13 @@ export function CookingMode({ recipe, completedSteps, onToggleStep, onExit }) {
     }
   }, [])
 
+  // aria-modal implies focus is managed: move it in on open. (Restoring it to the
+  // "Start cooking" trigger on close is handled by RecipeDetail, which owns that
+  // element — it has to survive this component's unmount to receive focus back.)
+  useEffect(() => {
+    exitButtonRef.current?.focus()
+  }, [])
+
   function handleTouchStart(event) {
     const touch = event.touches[0]
     touchStartRef.current = { x: touch.clientX, y: touch.clientY }
@@ -99,6 +112,10 @@ export function CookingMode({ recipe, completedSteps, onToggleStep, onExit }) {
     const deltaY = touch.clientY - start.y
     if (Math.abs(deltaX) < SWIPE_THRESHOLD_PX || Math.abs(deltaX) < Math.abs(deltaY)) return
 
+    // A real swipe on the instruction label can also fire a compatibility click on
+    // touchend, which would double as a tap-to-complete — suppress it once this is
+    // confirmed to be a step-change gesture, not a tap.
+    event.preventDefault()
     goToDelta(deltaX < 0 ? 1 : -1)
   }
 
@@ -123,6 +140,7 @@ export function CookingMode({ recipe, completedSteps, onToggleStep, onExit }) {
           Step {stepIndex + 1} of {total}
         </p>
         <button
+          ref={exitButtonRef}
           type="button"
           className="grid size-9 place-items-center p-0 text-ink-soft bg-transparent border border-line rounded-full cursor-pointer transition-colors duration-150 hover:text-tomato hover:border-tomato focus-visible:outline-3 focus-visible:outline-cobalt focus-visible:outline-offset-4"
           onClick={onExit}

@@ -202,7 +202,9 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
                             onSelect={recipesHook.setSelectedIndex}
                           />
 
-                          {selectedRecipe && <RecipeDetail recipe={selectedRecipe} key={recipesHook.selectedIndex} />}
+                          {selectedRecipe && (
+                            <RecipeDetail recipe={selectedRecipe} key={recipesHook.selectedIndex} active={!hidden} />
+                          )}
 
                           <Button variant="ghost" className="mt-1" onClick={onStartOver}>
                             <ScanIcon />
