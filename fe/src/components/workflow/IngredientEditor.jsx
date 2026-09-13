@@ -47,7 +47,7 @@ export function IngredientEditor({
             <Chip
               key={ingredient}
               label={ingredient}
-              staggerIndex={index < detectedCount ? index : 0}
+              staggerIndex={index < detectedCount ? index : null}
               onRemove={() => onRemoveItem(ingredient)}
             />
           ))}

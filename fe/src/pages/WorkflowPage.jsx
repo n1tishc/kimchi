@@ -15,6 +15,7 @@ import { RecipePicker } from '../components/workflow/RecipePicker'
 import { RecipeSkeleton } from '../components/workflow/RecipeSkeleton'
 import { Stepper } from '../components/workflow/Stepper'
 import { UploadCard } from '../components/workflow/UploadCard'
+import { reducedTransition } from '../lib/motion'
 
 export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) {
   const [phase, setPhase] = useState('upload')
@@ -126,8 +127,8 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
         <motion.div
           key={phase}
           initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 12 }}
-          animate={{ opacity: 1, y: 0, transition: { duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' } }}
-          exit={{ opacity: 0, transition: { duration: prefersReducedMotion ? 0 : 0.15, ease: 'easeOut' } }}
+          animate={{ opacity: 1, y: 0, transition: reducedTransition(prefersReducedMotion, { duration: 0.2, ease: 'easeOut' }) }}
+          exit={{ opacity: 0, transition: reducedTransition(prefersReducedMotion, { duration: 0.15, ease: 'easeOut' }) }}
         >
           {phase === 'upload' && (
             <UploadCard
@@ -178,7 +179,7 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
                   {recipesHook.loading && (
                     <motion.div
                       key="skeleton"
-                      exit={{ opacity: 0, transition: { duration: prefersReducedMotion ? 0 : 0.15, ease: 'easeOut' } }}
+                      exit={{ opacity: 0, transition: reducedTransition(prefersReducedMotion, { duration: 0.15, ease: 'easeOut' }) }}
                     >
                       <RecipeSkeleton />
                     </motion.div>
@@ -187,7 +188,7 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
                     <motion.div
                       key="content"
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: 1, transition: { duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' } }}
+                      animate={{ opacity: 1, transition: reducedTransition(prefersReducedMotion, { duration: 0.2, ease: 'easeOut' }) }}
                     >
                       {!recipesHook.recipes || recipesHook.recipes.length === 0 ? (
                         <p className="p-6 bg-surface border border-line text-ink-soft leading-[1.5]">

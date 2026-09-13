@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { ClockIcon } from '../../icons/ClockIcon'
+import { reducedTransition } from '../../lib/motion'
 
 export function RecipePicker({ recipes, selectedIndex, onSelect }) {
   const prefersReducedMotion = useReducedMotion()
@@ -24,15 +25,15 @@ export function RecipePicker({ recipes, selectedIndex, onSelect }) {
             animate={{
               opacity: 1,
               scale: 1,
-              transition: {
-                duration: prefersReducedMotion ? 0 : 0.25,
-                delay: prefersReducedMotion ? 0 : index * 0.1,
-                ease: 'easeOut',
-              },
+              transition: reducedTransition(prefersReducedMotion, { duration: 0.25, delay: index * 0.1, ease: 'easeOut' }),
             }}
             whileHover={
-              !selected && !prefersReducedMotion
-                ? { y: -2, boxShadow: '0 6px 16px rgba(0,0,0,.1)', transition: { duration: 0.17 } }
+              !selected
+                ? {
+                    y: -2,
+                    boxShadow: '0 6px 16px rgba(0,0,0,.1)',
+                    transition: reducedTransition(prefersReducedMotion, { duration: 0.17 }),
+                  }
                 : undefined
             }
           >

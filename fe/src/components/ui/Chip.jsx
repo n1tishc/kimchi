@@ -1,7 +1,10 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { CloseIcon } from '../../icons/CloseIcon'
+import { reducedTransition } from '../../lib/motion'
 
-export function Chip({ label, onRemove, staggerIndex = 0 }) {
+// staggerIndex: position within the initially-detected batch, or null for a
+// chip added later (which should appear immediately, not queue behind a delay).
+export function Chip({ label, onRemove, staggerIndex = null }) {
   const prefersReducedMotion = useReducedMotion()
 
   return (
@@ -12,11 +15,11 @@ export function Chip({ label, onRemove, staggerIndex = 0 }) {
         opacity: 1,
         scale: 1,
         y: 0,
-        transition: {
-          duration: prefersReducedMotion ? 0 : 0.25,
-          delay: prefersReducedMotion ? 0 : staggerIndex * 0.06,
+        transition: reducedTransition(prefersReducedMotion, {
+          duration: 0.25,
+          delay: staggerIndex == null ? 0 : staggerIndex * 0.06,
           ease: 'easeOut',
-        },
+        }),
       }}
     >
       <span>{label}</span>
