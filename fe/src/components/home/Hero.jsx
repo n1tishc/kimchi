@@ -25,7 +25,7 @@ function ProductPreview() {
 
       <div className="grid gap-2.5 p-3 bg-cobalt-wash rounded-lg">
         <span className="text-ink-soft text-[.72rem] font-bold">Drop a photo</span>
-        <span className="inline-flex w-fit px-2.5 py-1 text-white bg-ink text-[.68rem] font-bold rounded-lg">
+        <span className="inline-flex w-fit px-2.5 py-1 text-white bg-ink-fixed text-[.68rem] font-bold rounded-lg">
           Choose file
         </span>
       </div>
@@ -36,7 +36,7 @@ function ProductPreview() {
         <span className="text-ink-soft text-[.72rem] font-bold">4 ingredients found</span>
         <div className="flex flex-wrap gap-1.5">
           {PREVIEW_INGREDIENTS.map((item) => (
-            <span className="px-2 py-1 text-ink bg-white text-[.68rem] font-bold rounded-[20px]" key={item}>
+            <span className="px-2 py-1 text-ink-fixed bg-white text-[.68rem] font-bold rounded-[20px]" key={item}>
               {item}
             </span>
           ))}

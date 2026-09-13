@@ -1,4 +1,9 @@
+import { useTheme } from '../../hooks/useTheme.js'
+import { ThemeToggle } from '../ui/ThemeToggle'
+
 export function Header({ view, onGoHome, onPrimaryAction }) {
+  const { isDark, toggleTheme } = useTheme()
+
   return (
     <header className="flex items-center justify-between min-h-[76px] max-[760px]:min-h-[65px] border-b border-line">
       <button
@@ -24,8 +29,9 @@ export function Header({ view, onGoHome, onPrimaryAction }) {
             How it works
           </a>
         )}
+        <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
         <button
-          className="min-h-[38px] max-[480px]:min-h-9 px-[13px] max-[480px]:px-2.5 rounded-xl text-ink bg-gold border border-line cursor-pointer text-[.76rem] font-bold transition-colors duration-150 hover:bg-[#d69a0f] focus-visible:outline-3 focus-visible:outline-cobalt focus-visible:outline-offset-4"
+          className="min-h-[38px] max-[480px]:min-h-9 px-[13px] max-[480px]:px-2.5 rounded-xl text-ink-fixed bg-gold border border-line cursor-pointer text-[.76rem] font-bold transition-colors duration-150 hover:bg-[#d69a0f] focus-visible:outline-3 focus-visible:outline-cobalt focus-visible:outline-offset-4"
           type="button"
           onClick={onPrimaryAction}
         >

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: `dark:` matches inside `<html class="dark">`, driven by useTheme.js. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-paper: #fafaf7;
   --color-surface: #ffffff;
@@ -20,6 +23,10 @@
   --color-gold-ink: #8a6100;
   --color-danger: #c0392b;
   --color-danger-wash: #fdecea;
+  /* Always-dark ink, for text/backgrounds that sit on a swatch which doesn't
+     itself flip in dark mode (a solid gold button, a literal white chip in the
+     hero mockup) — using --color-ink there would invert to light-on-light. */
+  --color-ink-fixed: #1a1a1a;
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -40,9 +47,38 @@
   to { transform: translateX(100%); }
 }
 
+/* Dark palette (REFACTOR_SPEC.md §3.2). Redefining the same tokens here, rather
+   than adding a `dark:` utility to every call site, means every component that
+   already reads a semantic token (bg-surface, text-ink, border-line, ...) picks
+   up the dark value for free — one override point instead of one per usage. */
+:root.dark {
+  --color-paper: #141414;
+  --color-surface: #1e1e1e;
+  --color-sunken: #0a0a0a;
+  --color-ink: #e8e8e8;
+  --color-ink-soft: #a0a0a0;
+  --color-ink-faint: #707070;
+  --color-line: #2d2d2d;
+  --color-tomato: #ff5449;
+  --color-tomato-dark: #d93025;
+  --color-tomato-wash: #2d1515;
+  --color-cobalt: #5b9bff;
+  --color-cobalt-wash: #13243a;
+  --color-leaf: #34c77e;
+  --color-leaf-wash: #12271c;
+  --color-gold-wash: #2e2408;
+  --color-gold-ink: #f0c24e;
+  --color-danger: #ff6b5b;
+  --color-danger-wash: #301410;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
   }
   body {
     min-width: 320px;

@@ -15,6 +15,20 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <script>
+      // Applies the theme before first paint to avoid a light-mode flash. Keep
+      // the storage key and fallback logic in sync with src/hooks/useTheme.js.
+      (function () {
+        try {
+          var stored = localStorage.getItem('kimchi-theme')
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          var isDark = stored === 'dark' || (stored !== 'light' && prefersDark)
+          document.documentElement.classList.toggle('dark', isDark)
+        } catch (error) {
+          // localStorage/matchMedia unavailable — fall back to the light theme.
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -18,7 +18,7 @@ export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, er
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)_230px] max-[760px]:grid-cols-1 border border-line">
-        <label className="grid min-h-[348px] max-[760px]:min-h-[285px] place-items-center overflow-hidden p-6 text-ink-soft bg-cobalt-wash border-r border-line max-[760px]:border-r-0 max-[760px]:border-b text-center cursor-pointer transition-colors duration-[180ms] hover:bg-[#d7e6fc] focus-within:outline-3 focus-within:outline-tomato focus-within:outline-offset-[3px]">
+        <label className="grid min-h-[348px] max-[760px]:min-h-[285px] place-items-center overflow-hidden p-6 text-ink-soft bg-cobalt-wash border-r border-line max-[760px]:border-r-0 max-[760px]:border-b text-center cursor-pointer transition-colors duration-[180ms] hover:bg-[#d7e6fc] dark:hover:bg-[#1a3550] focus-within:outline-3 focus-within:outline-tomato focus-within:outline-offset-[3px]">
           {preview ? (
             <img
               className="block w-full h-full max-h-[454px] object-contain mix-blend-multiply"

@@ -79,7 +79,7 @@ export function HowItWorks({ onSelectPhase }) {
               {step.description}
             </span>
             <span
-              className="absolute right-[18px] bottom-[18px] max-[760px]:right-[14px] max-[760px]:bottom-3 grid size-[34px] place-items-center text-white bg-ink rounded-full"
+              className="absolute right-[18px] bottom-[18px] max-[760px]:right-[14px] max-[760px]:bottom-3 grid size-[34px] place-items-center text-white bg-ink-fixed rounded-full"
               aria-hidden="true"
             >
               <ArrowRightIcon />

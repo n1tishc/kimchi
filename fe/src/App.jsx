@@ -32,7 +32,7 @@ export default function App() {
   return (
     <div className="min-h-[100svh] pb-20 bg-paper">
       <a
-        className="fixed top-2 left-2 z-20 px-3.5 py-2.5 text-white bg-ink -translate-y-[160%] transition-transform duration-150 focus:translate-y-0"
+        className="fixed top-2 left-2 z-20 px-3.5 py-2.5 text-white bg-ink-fixed -translate-y-[160%] transition-transform duration-150 focus:translate-y-0"
         href={view === 'home' ? '#how-it-works' : '#workflow'}
       >
         Skip to content
