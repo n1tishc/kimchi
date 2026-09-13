@@ -226,16 +226,16 @@ No React Router. Keep the current `view` state approach (`home` | `workflow`). T
 
 Each slice is a **shippable vertical increment** — it can be merged and deployed independently. They are ordered by priority and dependency. Each slice's full acceptance criteria live in its own file, linked below.
 
-| Slice | Goal | Depends on |
-|---|---|---|
-| [1. Scaffold + Component Decomposition + Tailwind](refactor-slices/01-scaffold-tailwind.md) | Break the monolith, set up Tailwind, same UI from the new file structure | — |
-| [2. Design System Migration](refactor-slices/02-design-system.md) | Apply new design tokens, typography, and visual language | Slice 1 |
-| [3. Hero Redesign + TechShowcase Section](refactor-slices/03-hero-techshowcase.md) | Make the landing page prove the ML pipeline | Slice 2 |
-| [4. Micro-Interactions + Motion](refactor-slices/04-motion.md) | Add delight to detection reveal, phase transitions, recipe appearance | Slice 1 |
-| [5. Recipe Detail Redesign](refactor-slices/05-recipe-detail.md) | Make the recipe view scannable, breathable, kitchen-usable | Slice 2 |
-| [6. Dark Mode](refactor-slices/06-dark-mode.md) | Theme toggle with system preference detection | Slice 2 |
-| [7. Upload Zone Drag-and-Drop Fix](refactor-slices/07-drag-drop.md) | Wire up the drag handlers the copy already promises | — |
-| [8. Mobile Cooking Mode](refactor-slices/08-cooking-mode.md) | Step-by-step full-screen cooking view on mobile | Slice 5 |
+| Slice | Goal | Depends on | Status |
+|---|---|---|---|
+| [1. Scaffold + Component Decomposition + Tailwind](refactor-slices/01-scaffold-tailwind.md) | Break the monolith, set up Tailwind, same UI from the new file structure | — | ✅ Done |
+| [2. Design System Migration](refactor-slices/02-design-system.md) | Apply new design tokens, typography, and visual language | Slice 1 | Not started |
+| [3. Hero Redesign + TechShowcase Section](refactor-slices/03-hero-techshowcase.md) | Make the landing page prove the ML pipeline | Slice 2 | Not started |
+| [4. Micro-Interactions + Motion](refactor-slices/04-motion.md) | Add delight to detection reveal, phase transitions, recipe appearance | Slice 1 | Not started |
+| [5. Recipe Detail Redesign](refactor-slices/05-recipe-detail.md) | Make the recipe view scannable, breathable, kitchen-usable | Slice 2 | Not started |
+| [6. Dark Mode](refactor-slices/06-dark-mode.md) | Theme toggle with system preference detection | Slice 2 | Not started |
+| [7. Upload Zone Drag-and-Drop Fix](refactor-slices/07-drag-drop.md) | Wire up the drag handlers the copy already promises | — | Not started |
+| [8. Mobile Cooking Mode](refactor-slices/08-cooking-mode.md) | Step-by-step full-screen cooking view on mobile | Slice 5 | Not started |
 
 ---
 

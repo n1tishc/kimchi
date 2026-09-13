@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #fff8ed;
+  --color-surface: #fffdf8;
+  --color-ink: #25221e;
+  --color-ink-soft: #605b52;
+  --color-ink-faint: #827a6d;
+  --color-line: #d9cdbb;
+  --color-tomato: #b54225;
+  --color-tomato-dark: #8f2e18;
+  --color-tomato-wash: #f7ded5;
+  --color-cobalt: #2f5da8;
+  --color-cobalt-wash: #dfeaff;
+  --color-leaf: #276550;
+  --color-leaf-wash: #dcece1;
+  --color-butter: #f4cb54;
+  --color-cream: #f5eadb;
+  --color-danger: #a53027;
+  --color-danger-wash: #fde5e1;
+
+  --font-sans: 'DM Sans', Arial, sans-serif;
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+
+  --shadow-hard: 4px 5px 0 rgba(37, 34, 30, .12);
+
+  --animate-spin-fast: spin-fast 750ms linear infinite;
+  --animate-scan: scan 1s ease-in-out infinite alternate;
+  --animate-shimmer: shimmer 1.5s infinite;
+  --animate-settle: settle 300ms ease-out both;
+  --animate-settle-back: settle-back 300ms ease-out both;
+}
+
+@keyframes spin-fast {
+  to { transform: rotate(360deg); }
+}
+@keyframes scan {
+  from { transform: translateX(-15%); }
+  to { transform: translateX(135%); }
+}
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+@keyframes settle {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes settle-back {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    min-width: 320px;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, label {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button {
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  /* Ingredients/summary list bullet + step counter: `content` values are set here
+     rather than via Tailwind's before:/after: variants, whose utilities-layer
+     `content: var(--tw-content)` would otherwise win the cascade and blank them out. */
+  .recipe-steps {
+    counter-reset: step;
+  }
+  .recipe-steps > li {
+    counter-increment: step;
+  }
+  .recipe-steps > li::before {
+    position: absolute;
+    top: 1px;
+    left: 0;
+    content: counter(step, decimal-leading-zero);
+    color: var(--color-tomato);
+    font-family: var(--font-mono);
+    font-size: .7rem;
+  }
+  .compact-list > li::before {
+    position: absolute;
+    left: 0;
+    content: '—';
+    color: var(--color-tomato);
+  }
+  .cooks-note::before {
+    content: 'Cook’s note: ';
+    font-weight: 700;
+  }
+
+  .skel {
+    position: relative;
+    overflow: hidden;
+    background: #e8dfd3;
+  }
+  .skel::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .72), transparent);
+    animation: var(--animate-shimmer);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
