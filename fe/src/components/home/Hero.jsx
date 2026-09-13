@@ -1,47 +1,54 @@
 import { ArrowRightIcon } from '../../icons/ArrowRightIcon'
 import { Button } from '../ui/Button'
 
-function HomeScanVisual() {
+const PREVIEW_INGREDIENTS = ['Chicken', 'Peppers', 'Potatoes', 'Tomato']
+
+function StepDivider() {
+  return (
+    <span className="mx-auto text-ink-faint text-xs leading-none" aria-hidden="true">
+      ↓
+    </span>
+  )
+}
+
+function ProductPreview() {
   return (
     <div
-      className="grid min-h-[454px] max-[760px]:min-h-[384px] max-[760px]:order-[-1] max-[480px]:min-h-[340px] place-items-center overflow-hidden bg-cobalt-wash border border-line shadow-soft"
+      className="grid content-center gap-2.5 min-h-[454px] max-[760px]:min-h-[384px] max-[760px]:order-[-1] max-[480px]:min-h-[340px] p-5 max-[480px]:p-4 overflow-hidden bg-surface border border-line rounded-xl shadow-soft"
       aria-hidden="true"
     >
-      <svg className="block w-[min(92%,390px)] h-auto" viewBox="0 0 360 360" fill="none">
-        <rect
-          className="fill-[rgba(26,26,26,.18)]"
-          x="66"
-          y="50"
-          width="225"
-          height="260"
-          transform="rotate(8 66 50)"
-        />
-        <rect
-          className="fill-surface stroke-ink stroke-[3]"
-          x="52"
-          y="40"
-          width="225"
-          height="260"
-          transform="rotate(-5 52 40)"
-        />
-        <path
-          className="stroke-ink stroke-[5] [stroke-linecap:round] [stroke-linejoin:round]"
-          d="M102 134V99h35m86 0h35v35m0 92v35h-35m-86 0h-35v-35"
-        />
-        <circle className="fill-butter stroke-ink stroke-[3]" cx="180" cy="180" r="52" />
-        <path
-          className="fill-butter stroke-ink stroke-[3]"
-          d="m180 137 37 21v44l-37 21-37-21v-44l37-21Z"
-        />
-        <path
-          className="stroke-tomato stroke-[3] [stroke-linecap:round]"
-          d="M75 287 145 237M285 76l-70 51"
-        />
-        <path
-          className="stroke-leaf stroke-[3] [stroke-linecap:round]"
-          d="M300 116v25M287 128h25M74 210v20M64 220h20"
-        />
-      </svg>
+      <div className="flex items-center gap-1.5">
+        <span className="size-2.5 rounded-full bg-line" />
+        <span className="size-2.5 rounded-full bg-line" />
+        <span className="size-2.5 rounded-full bg-line" />
+      </div>
+
+      <div className="grid gap-2.5 p-3 bg-cobalt-wash rounded-lg">
+        <span className="text-ink-soft text-[.72rem] font-bold">Drop a photo</span>
+        <span className="inline-flex w-fit px-2.5 py-1 text-white bg-ink text-[.68rem] font-bold rounded-lg">
+          Choose file
+        </span>
+      </div>
+
+      <StepDivider />
+
+      <div className="grid gap-2 p-3 bg-leaf-wash rounded-lg">
+        <span className="text-ink-soft text-[.72rem] font-bold">4 ingredients found</span>
+        <div className="flex flex-wrap gap-1.5">
+          {PREVIEW_INGREDIENTS.map((item) => (
+            <span className="px-2 py-1 text-ink bg-white text-[.68rem] font-bold rounded-[20px]" key={item}>
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <StepDivider />
+
+      <div className="grid gap-1.5 p-3 bg-tomato-wash rounded-lg">
+        <span className="font-bold text-[.86rem] tracking-tight">Chicken &amp; Pepper Stew</span>
+        <span className="text-ink-faint text-[.68rem] font-medium">75 min · Medium</span>
+      </div>
     </div>
   )
 }
@@ -60,10 +67,10 @@ export function Hero({ onStartCooking }) {
           id="home-title"
           className="max-w-[10.5ch] m-0 font-bold text-[clamp(3.6rem,7.4vw,6.9rem)] max-[760px]:text-[clamp(3.4rem,15vw,5.5rem)] max-[480px]:text-[clamp(3.25rem,15.5vw,4.8rem)] tracking-tight leading-[.84] text-balance"
         >
-          Dinner, from the things already staring at you.
+          Photograph your ingredients. Get real recipes.
         </h1>
         <p className="max-w-[47ch] mt-[25px] text-ink-soft text-[1.04rem] max-[480px]:text-[.97rem] leading-[1.6]">
-          A photo in. A real recipe out. No doom-scrolling, no shopping-list guilt.
+          A fine-tuned vision model detects what&apos;s on your counter. An LLM turns it into three cookable recipes.
         </p>
         <Button variant="primary" className="mt-[29px]" onClick={onStartCooking}>
           Let&apos;s see the fridge <ArrowRightIcon />
@@ -72,7 +79,7 @@ export function Hero({ onStartCooking }) {
           Takes about a minute. Chef&apos;s promise.
         </p>
       </div>
-      <HomeScanVisual />
+      <ProductPreview />
     </section>
   )
 }

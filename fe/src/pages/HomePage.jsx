@@ -2,6 +2,7 @@ import { ArrowRightIcon } from '../icons/ArrowRightIcon'
 import { SparkIcon } from '../icons/SparkIcon'
 import { Hero } from '../components/home/Hero'
 import { HowItWorks } from '../components/home/HowItWorks'
+import { TechShowcase } from '../components/home/TechShowcase'
 import { Button } from '../components/ui/Button'
 
 export function HomePage({ hidden, onStartCooking }) {
@@ -12,6 +13,7 @@ export function HomePage({ hidden, onStartCooking }) {
       hidden={hidden}
     >
       <Hero onStartCooking={onStartCooking} />
+      <TechShowcase />
       <HowItWorks onSelectPhase={onStartCooking} />
 
       <section className="grid grid-cols-[175px_minmax(0,1fr)_auto] max-[760px]:grid-cols-[130px_1fr] max-[480px]:grid-cols-[105px_1fr] items-center gap-[clamp(25px,5vw,64px)] max-[760px]:gap-3.5 mt-[clamp(82px,12vw,150px)] py-[30px] border-y border-line">
