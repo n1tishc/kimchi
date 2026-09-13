@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { CameraIcon } from '../../icons/CameraIcon'
 import { ScanIcon } from '../../icons/ScanIcon'
 import { UploadIcon } from '../../icons/UploadIcon'
@@ -6,6 +7,44 @@ import { Card } from '../ui/Card'
 import { ErrorNote } from '../ui/ErrorNote'
 
 export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, error }) {
+  const [isDragging, setIsDragging] = useState(false)
+  const [dropError, setDropError] = useState(null)
+
+  // Clears a stale "not an image" message once a file lands, from either drop or the file inputs.
+  useEffect(() => {
+    setDropError(null)
+  }, [preview])
+
+  function handleDragEnter(event) {
+    event.preventDefault()
+    setIsDragging(true)
+  }
+
+  function handleDragOver(event) {
+    event.preventDefault()
+  }
+
+  function handleDragLeave(event) {
+    // Children re-fire enter/leave as the pointer crosses them; only clear on a real exit.
+    if (event.currentTarget.contains(event.relatedTarget)) return
+    setIsDragging(false)
+  }
+
+  function handleDrop(event) {
+    event.preventDefault()
+    setIsDragging(false)
+
+    const droppedFile = event.dataTransfer.files?.[0]
+    if (!droppedFile) return
+
+    if (!droppedFile.type.startsWith('image/')) {
+      setDropError('That file isn’t an image. Drop a photo (JPG, PNG, etc.) instead.')
+      return
+    }
+
+    onPick(droppedFile)
+  }
+
   return (
     <Card as="section" className="grid gap-[26px] p-[clamp(22px,4vw,38px)] max-[480px]:p-[22px]" aria-label="Upload ingredients">
       <div className="grid gap-[7px]">
@@ -18,7 +57,17 @@ export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, er
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)_230px] max-[760px]:grid-cols-1 border border-line">
-        <label className="grid min-h-[348px] max-[760px]:min-h-[285px] place-items-center overflow-hidden p-6 text-ink-soft bg-cobalt-wash border-r border-line max-[760px]:border-r-0 max-[760px]:border-b text-center cursor-pointer transition-colors duration-[180ms] hover:bg-[#d7e6fc] dark:hover:bg-[#1a3550] focus-within:outline-3 focus-within:outline-tomato focus-within:outline-offset-[3px]">
+        <label
+          className={`grid min-h-[348px] max-[760px]:min-h-[285px] place-items-center overflow-hidden p-6 text-ink-soft text-center cursor-pointer transition-colors duration-[180ms] focus-within:outline-3 focus-within:outline-tomato focus-within:outline-offset-[3px] ${
+            isDragging
+              ? 'bg-tomato-wash border-2 border-dashed border-tomato'
+              : 'bg-cobalt-wash border-r border-line max-[760px]:border-r-0 max-[760px]:border-b hover:bg-[#d7e6fc] dark:hover:bg-[#1a3550]'
+          }`}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           {preview ? (
             <img
               className="block w-full h-full max-h-[454px] object-contain mix-blend-multiply"
@@ -59,6 +108,8 @@ export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, er
           </p>
         </aside>
       </div>
+
+      {dropError && <ErrorNote>{dropError}</ErrorNote>}
 
       <div className="flex flex-wrap gap-[11px] max-[480px]:grid max-[480px]:grid-cols-1">
         <Button as="label" className="max-[480px]:w-full">
