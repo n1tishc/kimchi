@@ -161,7 +161,7 @@ export function CookingMode({ recipe, completedSteps, onToggleStep, onExit }) {
           />
           <p
             className={`m-0 text-[1.35rem] max-[480px]:text-[1.15rem] font-bold leading-[1.45] ${
-              done ? 'text-ink-faint line-through' : ''
+              done ? 'text-ink-soft line-through' : ''
             }`}
           >
             {step.instruction}

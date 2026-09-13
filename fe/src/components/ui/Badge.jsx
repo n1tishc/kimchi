@@ -7,7 +7,7 @@ const TYPE_STYLES = {
 export function Badge({ type, className = '', children }) {
   return (
     <span
-      className={`flex-none rounded-r-[20px] border-l-[3px] px-2 py-1 font-mono text-[.6rem] tracking-[.02em] uppercase ${TYPE_STYLES[type]} ${className}`.trim()}
+      className={`flex-none rounded-r-[20px] border-l-[3px] px-2.5 py-1 text-[.76rem] font-bold ${TYPE_STYLES[type]} ${className}`.trim()}
     >
       {children}
     </span>

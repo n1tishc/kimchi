@@ -4,7 +4,7 @@ import { STEPS } from '../../lib/constants'
 const STATE_TEXT_COLOR = {
   active: 'text-tomato',
   done: 'text-leaf',
-  upcoming: 'text-ink-faint',
+  upcoming: 'text-ink-soft',
 }
 
 export function Stepper({ activeStep }) {

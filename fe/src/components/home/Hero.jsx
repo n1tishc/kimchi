@@ -47,7 +47,7 @@ function ProductPreview() {
 
       <div className="grid gap-1.5 p-3 bg-tomato-wash rounded-lg">
         <span className="font-bold text-[.86rem] tracking-tight">Chicken &amp; Pepper Stew</span>
-        <span className="text-ink-faint text-[.68rem] font-medium">75 min · Medium</span>
+        <span className="text-ink-soft text-[.68rem] font-medium">75 min · Medium</span>
       </div>
     </div>
   )
@@ -75,7 +75,7 @@ export function Hero({ onStartCooking }) {
         <Button variant="primary" className="mt-[29px]" onClick={onStartCooking}>
           Let&apos;s see the fridge <ArrowRightIcon />
         </Button>
-        <p className="mt-[13px] text-ink-faint text-[.72rem] font-medium">
+        <p className="mt-[13px] text-ink-soft text-[.72rem] font-medium">
           Takes about a minute. Chef&apos;s promise.
         </p>
       </div>

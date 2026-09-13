@@ -1,24 +1,30 @@
 import { ArrowRightIcon } from '../../icons/ArrowRightIcon'
+import { CameraIcon } from '../../icons/CameraIcon'
+import { ChipIcon } from '../../icons/ChipIcon'
+import { ListIcon } from '../../icons/ListIcon'
+import { RankIcon } from '../../icons/RankIcon'
+import { ScanIcon } from '../../icons/ScanIcon'
 import { Card } from '../ui/Card'
 
 const PIPELINE = [
-  { icon: '📸', label: 'Photo' },
-  { icon: '🔬', label: 'SmolVLM2-500M (fine-tuned)' },
-  { icon: '🧾', label: 'Ingredient List' },
-  { icon: '🤖', label: 'LLM Recipe Gen' },
-  { icon: '🍽️', label: '3 Ranked Recipes' },
+  { Icon: CameraIcon, label: 'Photo' },
+  { Icon: ScanIcon, label: 'SmolVLM2-500M (fine-tuned)' },
+  { Icon: ListIcon, label: 'Ingredient List' },
+  { Icon: ChipIcon, label: 'LLM Recipe Gen' },
+  { Icon: RankIcon, label: '3 Ranked Recipes' },
 ]
 
 const STATS = [
-  '82% recall on 51 ingredient classes',
-  'LoRA fine-tuned SmolVLM2-500M',
-  'Sub-30s end-to-end',
+  { value: '82%', label: 'recall' },
+  { value: '51', label: 'ingredient classes' },
+  { value: 'LoRA', label: 'fine-tuned SmolVLM2-500M' },
+  { value: '<30s', label: 'end-to-end' },
 ]
 
 function PipelineArrow() {
   return (
-    <span className="text-ink-faint text-lg max-[760px]:rotate-90" aria-hidden="true">
-      →
+    <span className="text-ink-faint max-[760px]:rotate-90" aria-hidden="true">
+      <ArrowRightIcon />
     </span>
   )
 }
@@ -36,11 +42,14 @@ export function TechShowcase() {
       <div className="flex items-center flex-wrap max-[760px]:flex-col max-[760px]:items-start gap-x-3 gap-y-2 p-5 max-[480px]:p-4 bg-sunken border border-line rounded-xl">
         {PIPELINE.map((node, index) => (
           <div className="contents" key={node.label}>
-            <div className="grid justify-items-center gap-1.5 max-[760px]:justify-items-start text-center max-[760px]:text-left">
-              <span className="text-[1.8rem] leading-none" aria-hidden="true">
-                {node.icon}
+            <div className="grid justify-items-center gap-2 max-[760px]:justify-items-start max-[760px]:grid-flow-col max-[760px]:items-center text-center max-[760px]:text-left">
+              <span
+                className="grid size-10 place-items-center text-tomato bg-surface border border-line rounded-full"
+                aria-hidden="true"
+              >
+                <node.Icon />
               </span>
-              <span className="max-w-[12ch] text-ink-soft text-[.72rem] font-bold leading-tight">
+              <span className="max-w-[12ch] max-[760px]:max-w-none text-ink-soft text-[.72rem] font-bold leading-tight">
                 {node.label}
               </span>
             </div>
@@ -49,10 +58,13 @@ export function TechShowcase() {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 max-[760px]:grid-cols-1 gap-6 mt-6">
+      <div className="grid grid-cols-4 max-[760px]:grid-cols-2 max-[480px]:grid-cols-1 gap-6 mt-6">
         {STATS.map((stat) => (
-          <Card className="p-5" key={stat}>
-            <p className="m-0 text-[1rem] font-bold leading-snug">{stat}</p>
+          <Card className="p-5" key={stat.label}>
+            <p className="m-0 font-mono text-[1.9rem] font-bold text-tomato tracking-tight leading-none">
+              {stat.value}
+            </p>
+            <p className="m-0 mt-2 text-ink-soft text-[.8rem] font-medium leading-snug">{stat.label}</p>
           </Card>
         ))}
       </div>

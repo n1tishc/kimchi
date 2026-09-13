@@ -42,7 +42,7 @@ export function RecipePicker({ recipes, selectedIndex, onSelect }) {
               {recipe.title}
             </span>
             <span className="line-clamp-3 text-ink-soft text-[.82rem] leading-[1.48]">{recipe.summary}</span>
-            <span className="inline-flex items-center gap-[5px] mt-auto text-ink-faint text-[.72rem] font-medium">
+            <span className="inline-flex items-center gap-[5px] mt-auto text-ink-soft text-[.72rem] font-medium">
               <ClockIcon className="w-[13px] h-[13px]" />
               {recipe.total_time_minutes} min · {recipe.difficulty}
             </span>

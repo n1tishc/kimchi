@@ -56,7 +56,7 @@ export function IngredientEditor({
 
       <form className="grid grid-cols-[minmax(0,1fr)_auto] max-[480px]:grid-cols-1 gap-2.5" onSubmit={onAddItem}>
         <input
-          className="min-h-12 w-full px-[13px] text-ink bg-surface border border-line rounded-lg text-[.92rem] placeholder:text-ink-faint focus:outline-3 focus:outline-tomato focus:outline-offset-1"
+          className="min-h-12 w-full px-[13px] text-ink bg-surface border border-line rounded-lg text-[.92rem] placeholder:text-ink-soft focus:outline-3 focus:outline-tomato focus:outline-offset-1"
           type="text"
           value={draft}
           aria-label="Add an ingredient"

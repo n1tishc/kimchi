@@ -151,7 +151,7 @@ export function RecipeDetail({ recipe, active = true }) {
                       onChange={() => toggleStep(index)}
                       aria-label={`Mark step ${stepNumber} as done`}
                     />
-                    <p className={`m-0 leading-[1.6] ${done ? 'text-ink-faint line-through' : ''}`}>
+                    <p className={`m-0 leading-[1.6] ${done ? 'text-ink-soft line-through' : ''}`}>
                       {step.instruction}
                     </p>
                   </label>
