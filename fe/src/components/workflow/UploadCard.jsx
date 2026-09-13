@@ -56,17 +56,19 @@ export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, er
         </p>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_230px] max-[760px]:grid-cols-1 border border-line">
+      <div
+        className="grid grid-cols-[minmax(0,1fr)_230px] max-[760px]:grid-cols-1 border border-line"
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <label
           className={`grid min-h-[348px] max-[760px]:min-h-[285px] place-items-center overflow-hidden p-6 text-ink-soft text-center cursor-pointer transition-colors duration-[180ms] focus-within:outline-3 focus-within:outline-tomato focus-within:outline-offset-[3px] ${
             isDragging
               ? 'bg-tomato-wash border-2 border-dashed border-tomato'
               : 'bg-cobalt-wash border-r border-line max-[760px]:border-r-0 max-[760px]:border-b hover:bg-[#d7e6fc] dark:hover:bg-[#1a3550]'
           }`}
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
         >
           {preview ? (
             <img
