@@ -32,3 +32,14 @@
 - **Reordered `HomePage.jsx`**: `Hero` → `TechShowcase` → `HowItWorks` → bottom CTA (was `Hero` → `HowItWorks` → CTA), per "keep phase cards below TechShowcase."
 
 **Verification caveat**: the Chrome browser extension was unavailable again this session (third session running with "Browser extension is not connected"), so this was verified via `npm run build`/`npm run lint`, grepping the built JS bundle to confirm the new copy/HF link compiled in and the old headline is gone, and a dev-server curl of `?demo=1`. As with Slice 2, this is a purely visual slice, so a manual `npm run dev` pass across desktop/tablet/mobile is recommended before merging — specifically to confirm the 5-node pipeline diagram and the hero mockup render as intended at all three breakpoints.
+
+### Review-driven fixes
+
+A two-axis code review against `15e6984...8b9a306` found no missing/wrong spec requirements and no scope creep. It did flag one Duplicated-Code judgment call, fixed:
+
+- **`TechShowcase.jsx`'s `PipelineArrow`** rendered two `<span>`s (a `→` hidden below 760px, a `↓` shown only below 760px) to fake a responsive glyph swap. Collapsed to one `<span>` that rotates 90° via `max-[760px]:rotate-90` on the same `→` glyph — one DOM node instead of two, same visual result.
+
+Left unfixed (judgement calls, not urgent):
+
+- **Cross-file duplication between `Hero.jsx`'s `StepDivider` and `TechShowcase.jsx`'s `PipelineArrow`**: both are small aria-hidden arrow separators in `text-ink-faint`, but they aren't equivalent — one is a fixed vertical glyph with no responsive behavior, the other switches orientation at a breakpoint. The reviewer itself called extracting a shared primitive "reasonable, not a must-fix" given the behavior would have to become a prop for a 2-site case. Same treatment as Slice 2's hover-lift duplication: below the threshold that justifies an abstraction.
+- **`PREVIEW_INGREDIENTS`/`PIPELINE`/`STATS` live as local consts in their component files** rather than in `lib/constants.js`, unlike `STEPS`/`CUISINES`. These are presentational copy for one-off marketing sections (in the same spirit as the hero's inline headline/subhead strings), not reusable app data, so colocating them with their single consumer is consistent with how the rest of the codebase treats literal copy.

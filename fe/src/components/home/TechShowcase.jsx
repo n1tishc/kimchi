@@ -17,14 +17,9 @@ const STATS = [
 
 function PipelineArrow() {
   return (
-    <>
-      <span className="text-ink-faint text-lg max-[760px]:hidden" aria-hidden="true">
-        →
-      </span>
-      <span className="hidden max-[760px]:block text-ink-faint text-lg" aria-hidden="true">
-        ↓
-      </span>
-    </>
+    <span className="text-ink-faint text-lg max-[760px]:rotate-90" aria-hidden="true">
+      →
+    </span>
   )
 }
 
