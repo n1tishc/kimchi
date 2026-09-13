@@ -102,16 +102,16 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
       hidden={hidden}
     >
       <section
-        className="grid items-center min-h-[270px] max-[760px]:min-h-[230px] mb-[26px] px-[clamp(2px,3vw,34px)] overflow-hidden bg-cobalt-wash border border-ink shadow-hard"
+        className="grid items-center min-h-[270px] max-[760px]:min-h-[230px] mb-[26px] px-[clamp(2px,3vw,34px)] overflow-hidden bg-cobalt-wash border border-line shadow-soft"
         aria-labelledby="stage-title"
       >
         <div className="relative z-[2] py-7">
-          <p className="mb-3 text-tomato font-mono text-[.68rem] font-medium tracking-[.08em] uppercase">
+          <p className="mb-3 text-tomato text-[.8rem] font-bold">
             {currentStep.number} · {currentStep.label}
           </p>
           <h1
             id="stage-title"
-            className="max-w-[13ch] m-0 font-serif text-[clamp(2.85rem,5vw,4.8rem)] max-[760px]:text-[clamp(2.65rem,10vw,4.15rem)] font-medium tracking-[-.065em] leading-[.84] text-balance"
+            className="max-w-[13ch] m-0 font-bold text-[clamp(2.85rem,5vw,4.8rem)] max-[760px]:text-[clamp(2.65rem,10vw,4.15rem)] tracking-[-0.03em] leading-[.84] text-balance"
           >
             {currentStep.title}
           </h1>
@@ -154,7 +154,7 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
             <div className="grid grid-cols-[auto_minmax(0,1fr)] max-[480px]:grid-cols-1 items-start gap-4 max-[480px]:gap-3 pt-4">
               <BackLink onClick={() => goTo('ingredients', 'back')}>Ingredients</BackLink>
               <div className="min-w-0">
-                <h2 className="m-0 font-serif text-[clamp(2.15rem,4vw,3rem)] font-medium tracking-[-.05em] leading-[.95]">
+                <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-[-0.03em] leading-[.95]">
                   Pick tonight&apos;s plot twist.
                 </h2>
                 <p className="max-w-[54ch] m-0 text-ink-soft text-[.94rem] leading-[1.55]">
@@ -168,7 +168,7 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
             {recipesHook.loading ? (
               <RecipeSkeleton />
             ) : !recipesHook.recipes || recipesHook.recipes.length === 0 ? (
-              <p className="p-6 bg-surface border border-ink text-ink-soft leading-[1.5]">No recipes returned.</p>
+              <p className="p-6 bg-surface border border-line text-ink-soft leading-[1.5]">No recipes returned.</p>
             ) : (
               <>
                 <RecipePicker

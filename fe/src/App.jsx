@@ -37,7 +37,7 @@ export default function App() {
       >
         Skip to content
       </a>
-      <div className="w-[min(100%-48px,1120px)] max-[760px]:w-[min(100%-28px,1120px)] mx-auto">
+      <div className="w-[min(100%-48px,1080px)] max-[760px]:w-[min(100%-28px,1080px)] mx-auto">
         <Header view={view} onGoHome={goHome} onPrimaryAction={view === 'home' ? beginCooking : startOver} />
         <HomePage hidden={view !== 'home'} onStartCooking={beginCooking} />
         <WorkflowPage

@@ -4,12 +4,12 @@ import { Button } from '../ui/Button'
 function HomeScanVisual() {
   return (
     <div
-      className="grid min-h-[454px] max-[760px]:min-h-[384px] max-[760px]:order-[-1] max-[480px]:min-h-[340px] place-items-center overflow-hidden bg-cobalt-wash border border-ink shadow-hard"
+      className="grid min-h-[454px] max-[760px]:min-h-[384px] max-[760px]:order-[-1] max-[480px]:min-h-[340px] place-items-center overflow-hidden bg-cobalt-wash border border-line shadow-soft"
       aria-hidden="true"
     >
       <svg className="block w-[min(92%,390px)] h-auto" viewBox="0 0 360 360" fill="none">
         <rect
-          className="fill-[rgba(37,34,30,.18)]"
+          className="fill-[rgba(26,26,26,.18)]"
           x="66"
           y="50"
           width="225"
@@ -49,16 +49,16 @@ function HomeScanVisual() {
 export function Hero({ onStartCooking }) {
   return (
     <section
-      className="grid grid-cols-[minmax(0,.98fr)_minmax(360px,.92fr)] max-[760px]:grid-cols-1 items-center gap-[clamp(28px,7vw,88px)] max-[760px]:gap-[33px] min-h-[530px] max-[760px]:min-h-0"
+      className="grid grid-cols-[minmax(0,.98fr)_minmax(360px,.92fr)] max-[760px]:grid-cols-1 items-center gap-6 min-h-[530px] max-[760px]:min-h-0"
       aria-labelledby="home-title"
     >
       <div className="relative z-[1] max-w-[620px]">
-        <p className="mb-3 text-tomato font-mono text-[.68rem] font-medium tracking-[.08em] uppercase">
+        <p className="mb-3 text-tomato text-[.8rem] font-bold">
           Your tiny kitchen co-pilot
         </p>
         <h1
           id="home-title"
-          className="max-w-[10.5ch] m-0 font-serif text-[clamp(3.6rem,7.4vw,6.9rem)] max-[760px]:text-[clamp(3.4rem,15vw,5.5rem)] max-[480px]:text-[clamp(3.25rem,15.5vw,4.8rem)] font-medium tracking-[-.065em] leading-[.84] text-balance"
+          className="max-w-[10.5ch] m-0 font-bold text-[clamp(3.6rem,7.4vw,6.9rem)] max-[760px]:text-[clamp(3.4rem,15vw,5.5rem)] max-[480px]:text-[clamp(3.25rem,15.5vw,4.8rem)] tracking-[-0.03em] leading-[.84] text-balance"
         >
           Dinner, from the things already staring at you.
         </h1>

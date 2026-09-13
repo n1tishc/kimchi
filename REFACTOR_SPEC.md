@@ -229,7 +229,7 @@ Each slice is a **shippable vertical increment** — it can be merged and deploy
 | Slice | Goal | Depends on | Status |
 |---|---|---|---|
 | [1. Scaffold + Component Decomposition + Tailwind](refactor-slices/01-scaffold-tailwind.md) | Break the monolith, set up Tailwind, same UI from the new file structure | — | ✅ Done |
-| [2. Design System Migration](refactor-slices/02-design-system.md) | Apply new design tokens, typography, and visual language | Slice 1 | Not started |
+| [2. Design System Migration](refactor-slices/02-design-system.md) | Apply new design tokens, typography, and visual language | Slice 1 | ✅ Done |
 | [3. Hero Redesign + TechShowcase Section](refactor-slices/03-hero-techshowcase.md) | Make the landing page prove the ML pipeline | Slice 2 | Not started |
 | [4. Micro-Interactions + Motion](refactor-slices/04-motion.md) | Add delight to detection reveal, phase transitions, recipe appearance | Slice 1 | Not started |
 | [5. Recipe Detail Redesign](refactor-slices/05-recipe-detail.md) | Make the recipe view scannable, breathable, kitchen-usable | Slice 2 | Not started |

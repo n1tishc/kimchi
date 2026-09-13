@@ -1,29 +1,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #fff8ed;
-  --color-surface: #fffdf8;
-  --color-ink: #25221e;
-  --color-ink-soft: #605b52;
-  --color-ink-faint: #827a6d;
-  --color-line: #d9cdbb;
-  --color-tomato: #b54225;
-  --color-tomato-dark: #8f2e18;
-  --color-tomato-wash: #f7ded5;
-  --color-cobalt: #2f5da8;
-  --color-cobalt-wash: #dfeaff;
-  --color-leaf: #276550;
-  --color-leaf-wash: #dcece1;
-  --color-butter: #f4cb54;
-  --color-cream: #f5eadb;
-  --color-danger: #a53027;
-  --color-danger-wash: #fde5e1;
+  --color-paper: #fafaf7;
+  --color-surface: #ffffff;
+  --color-sunken: #f2f0eb;
+  --color-ink: #1a1a1a;
+  --color-ink-soft: #6b6b6b;
+  --color-ink-faint: #9c9c9c;
+  --color-line: #e4e1d9;
+  --color-tomato: #d93025;
+  --color-tomato-dark: #b71c1c;
+  --color-tomato-wash: #ffeae8;
+  --color-cobalt: #1a73e8;
+  --color-cobalt-wash: #e8f0fe;
+  --color-leaf: #1b7a4a;
+  --color-leaf-wash: #e6f4ec;
+  --color-gold: #e8a817;
+  --color-gold-wash: #fff8e1;
+  --color-gold-ink: #8a6100;
+  --color-danger: #c0392b;
+  --color-danger-wash: #fdecea;
 
-  --font-sans: 'DM Sans', Arial, sans-serif;
-  --font-serif: 'Newsreader', Georgia, serif;
-  --font-mono: 'DM Mono', ui-monospace, monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  --shadow-hard: 4px 5px 0 rgba(37, 34, 30, .12);
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .06);
 
   --animate-spin-fast: spin-fast 750ms linear infinite;
   --animate-scan: scan 1s ease-in-out infinite alternate;
@@ -106,7 +107,7 @@
   .skel {
     position: relative;
     overflow: hidden;
-    background: #e8dfd3;
+    background: var(--color-line);
   }
   .skel::after {
     position: absolute;

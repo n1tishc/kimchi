@@ -25,7 +25,7 @@ export function IngredientEditor({
       <div className="grid grid-cols-[auto_minmax(0,1fr)] max-[480px]:grid-cols-1 items-start gap-4 max-[480px]:gap-3">
         <BackLink onClick={onBack}>Photo</BackLink>
         <div className="min-w-0">
-          <h2 className="m-0 font-serif text-[clamp(2.15rem,4vw,3rem)] font-medium tracking-[-.05em] leading-[.95]">
+          <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-[-0.03em] leading-[.95]">
             {items.length} ingredient{items.length !== 1 ? 's' : ''} found
           </h2>
           <p className="max-w-[54ch] m-0 text-ink-soft text-[.94rem] leading-[1.55]">
@@ -46,7 +46,7 @@ export function IngredientEditor({
 
       <form className="grid grid-cols-[minmax(0,1fr)_auto] max-[480px]:grid-cols-1 gap-2.5" onSubmit={onAddItem}>
         <input
-          className="min-h-12 w-full px-[13px] text-ink bg-surface border border-ink rounded-none text-[.92rem] placeholder:text-ink-faint focus:outline-3 focus:outline-cobalt focus:outline-offset-1"
+          className="min-h-12 w-full px-[13px] text-ink bg-surface border border-line rounded-lg text-[.92rem] placeholder:text-ink-faint focus:outline-3 focus:outline-tomato focus:outline-offset-1"
           type="text"
           value={draft}
           aria-label="Add an ingredient"
@@ -63,7 +63,7 @@ export function IngredientEditor({
           Cuisine
           <div className="relative block">
             <select
-              className="min-h-12 w-full pl-[13px] pr-[38px] text-ink bg-surface border border-ink rounded-none text-[.92rem] appearance-none cursor-pointer focus:outline-3 focus:outline-cobalt focus:outline-offset-1"
+              className="min-h-12 w-full pl-[13px] pr-[38px] text-ink bg-surface border border-line rounded-lg text-[.92rem] appearance-none cursor-pointer focus:outline-3 focus:outline-tomato focus:outline-offset-1"
               value={cuisine}
               onChange={(event) => onCuisineChange(event.target.value)}
             >

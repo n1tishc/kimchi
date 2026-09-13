@@ -10,7 +10,7 @@ export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, er
   return (
     <Card as="section" className="grid gap-[26px] p-[clamp(22px,4vw,38px)] max-[480px]:p-[22px]" aria-label="Upload ingredients">
       <div className="grid gap-[7px]">
-        <h2 className="m-0 font-serif text-[clamp(2.15rem,4vw,3rem)] font-medium tracking-[-.05em] leading-[.95]">
+        <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-[-0.03em] leading-[.95]">
           Show the chef your haul.
         </h2>
         <p className="max-w-[54ch] m-0 text-ink-soft text-[.94rem] leading-[1.55]">
@@ -18,8 +18,8 @@ export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, er
         </p>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_230px] max-[760px]:grid-cols-1 border border-ink">
-        <label className="grid min-h-[348px] max-[760px]:min-h-[285px] place-items-center overflow-hidden p-6 text-ink-soft bg-cobalt-wash border-r border-ink max-[760px]:border-r-0 max-[760px]:border-b text-center cursor-pointer transition-colors duration-[180ms] hover:bg-[#d1e0fb] focus-within:outline-3 focus-within:outline-cobalt focus-within:outline-offset-[3px]">
+      <div className="grid grid-cols-[minmax(0,1fr)_230px] max-[760px]:grid-cols-1 border border-line">
+        <label className="grid min-h-[348px] max-[760px]:min-h-[285px] place-items-center overflow-hidden p-6 text-ink-soft bg-cobalt-wash border-r border-line max-[760px]:border-r-0 max-[760px]:border-b text-center cursor-pointer transition-colors duration-[180ms] hover:bg-[#d7e6fc] focus-within:outline-3 focus-within:outline-tomato focus-within:outline-offset-[3px]">
           {preview ? (
             <img
               className="block w-full h-full max-h-[454px] object-contain mix-blend-multiply"
@@ -49,7 +49,7 @@ export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, er
           className="self-stretch p-6 max-[760px]:p-[17px] bg-surface max-[760px]:grid max-[760px]:grid-cols-[1fr_1.25fr] max-[760px]:gap-[14px]"
           aria-label="Photo guidelines"
         >
-          <p className="mb-3 text-tomato font-mono text-[.68rem] font-medium tracking-[.08em] uppercase max-[760px]:col-span-2">
+          <p className="mb-3 text-tomato text-[.8rem] font-bold max-[760px]:col-span-2">
             For a better read
           </p>
           <p className="mb-6 max-[760px]:mb-0 max-[760px]:col-start-1 text-ink-soft text-[.84rem] leading-[1.55]">
