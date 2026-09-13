@@ -25,7 +25,7 @@ export function IngredientEditor({
       <div className="grid grid-cols-[auto_minmax(0,1fr)] max-[480px]:grid-cols-1 items-start gap-4 max-[480px]:gap-3">
         <BackLink onClick={onBack}>Photo</BackLink>
         <div className="min-w-0">
-          <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-[-0.03em] leading-[.95]">
+          <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-tight leading-[.95]">
             {items.length} ingredient{items.length !== 1 ? 's' : ''} found
           </h2>
           <p className="max-w-[54ch] m-0 text-ink-soft text-[.94rem] leading-[1.55]">
@@ -59,7 +59,7 @@ export function IngredientEditor({
       </form>
 
       <div className="grid grid-cols-[minmax(180px,1fr)_auto] max-[480px]:grid-cols-1 gap-3.5 items-end mt-px pt-[21px] border-t border-line">
-        <label className="grid gap-2 text-ink-soft font-mono text-[.67rem] tracking-[.07em] uppercase">
+        <label className="grid gap-2 text-ink-soft text-[.75rem] font-bold">
           Cuisine
           <div className="relative block">
             <select

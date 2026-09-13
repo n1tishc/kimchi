@@ -50,7 +50,7 @@ export function HowItWorks({ onSelectPhase }) {
         </p>
         <h2
           id="how-title"
-          className="max-w-[11ch] m-0 font-bold text-[clamp(2.6rem,5vw,4.6rem)] tracking-[-0.03em] leading-[.9] text-balance"
+          className="max-w-[11ch] m-0 font-bold text-[clamp(2.6rem,5vw,4.6rem)] tracking-tight leading-[.9] text-balance"
         >
           No recipe rabbit hole. Just this.
         </h2>
@@ -72,7 +72,7 @@ export function HowItWorks({ onSelectPhase }) {
             <span className="text-ink-soft font-mono text-[.67rem] max-[760px]:self-end max-[760px]:mt-6">
               {step.number}
             </span>
-            <strong className="my-2 max-[760px]:mt-[7px] max-[760px]:mb-[7px] font-bold text-[2rem] max-[760px]:text-[1.8rem] tracking-[-0.03em] leading-none">
+            <strong className="my-2 max-[760px]:mt-[7px] max-[760px]:mb-[7px] font-bold text-[2rem] max-[760px]:text-[1.8rem] tracking-tight leading-none">
               {step.label}
             </strong>
             <span className="max-w-[23ch] max-[760px]:pb-[2px] text-ink-soft text-[.86rem] leading-[1.52]">

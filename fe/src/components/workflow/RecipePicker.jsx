@@ -19,11 +19,11 @@ export function RecipePicker({ recipes, selectedIndex, onSelect }) {
             onClick={() => onSelect(index)}
           >
             <span className="text-tomato font-mono text-[.67rem] tracking-[.06em]">#{index + 1}</span>
-            <span className="font-bold text-[1.46rem] tracking-[-0.03em] leading-[1.02]">
+            <span className="font-bold text-[1.46rem] tracking-tight leading-[1.02]">
               {recipe.title}
             </span>
             <span className="line-clamp-3 text-ink-soft text-[.82rem] leading-[1.48]">{recipe.summary}</span>
-            <span className="inline-flex items-center gap-[5px] mt-auto text-ink-faint font-mono text-[.67rem]">
+            <span className="inline-flex items-center gap-[5px] mt-auto text-ink-faint text-[.72rem] font-medium">
               <ClockIcon className="w-[13px] h-[13px]" />
               {recipe.total_time_minutes} min · {recipe.difficulty}
             </span>

@@ -17,18 +17,18 @@ export function RecipeDetail({ recipe }) {
   return (
     <Card as="article" className="p-[clamp(24px,5vw,48px)] max-[480px]:p-[22px]">
       <header className="pb-7 border-b border-line">
-        <h2 className="max-w-[18ch] m-0 font-bold text-[clamp(2.5rem,5vw,4.25rem)] max-[480px]:text-[2.5rem] tracking-[-0.03em] leading-[.95] text-balance">
+        <h2 className="max-w-[18ch] m-0 font-bold text-[clamp(2.5rem,5vw,4.25rem)] max-[480px]:text-[2.5rem] tracking-tight leading-[.95] text-balance">
           {recipe.title}
         </h2>
         <p className="max-w-[65ch] mt-[18px] mb-0 text-ink-soft leading-[1.6]">{recipe.summary}</p>
         <div className="flex flex-wrap gap-[7px] mt-[19px]">
-          <span className="px-2 py-[5px] text-ink-soft bg-sunken border border-line font-mono text-[.65rem] tracking-[.02em]">
+          <span className="px-2 py-[5px] text-ink-soft bg-sunken border border-line text-[.72rem] font-medium">
             {recipe.servings} servings
           </span>
-          <span className="px-2 py-[5px] text-ink-soft bg-sunken border border-line font-mono text-[.65rem] tracking-[.02em]">
+          <span className="px-2 py-[5px] text-ink-soft bg-sunken border border-line text-[.72rem] font-medium">
             {recipe.total_time_minutes} min
           </span>
-          <span className="px-2 py-[5px] text-ink-soft bg-sunken border border-line font-mono text-[.65rem] tracking-[.02em]">
+          <span className="px-2 py-[5px] text-ink-soft bg-sunken border border-line text-[.72rem] font-medium">
             {recipe.difficulty}
           </span>
         </div>
@@ -102,7 +102,7 @@ export function RecipeDetail({ recipe }) {
 
       {recipe.level_up && (
         <p className="mt-[30px] mb-0 px-[18px] py-4 text-gold-ink bg-gold-wash border-l-4 border-gold leading-[1.55]">
-          <strong className="font-mono text-[.72rem] tracking-[.03em] uppercase">Level up:</strong> {recipe.level_up}
+          <strong className="text-[.85rem] font-bold">Level up:</strong> {recipe.level_up}
         </p>
       )}
     </Card>

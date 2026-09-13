@@ -25,7 +25,7 @@ export function HomePage({ hidden, onStartCooking }) {
           <p className="mb-3 text-tomato text-[.8rem] font-bold">
             Built for “what even is dinner?” nights
           </p>
-          <h2 className="max-w-[11ch] m-0 font-bold text-[clamp(2.6rem,5vw,4.6rem)] max-[480px]:text-[2.45rem] tracking-[-0.03em] leading-[.9] text-balance">
+          <h2 className="max-w-[11ch] m-0 font-bold text-[clamp(2.6rem,5vw,4.6rem)] max-[480px]:text-[2.45rem] tracking-tight leading-[.9] text-balance">
             Less figuring out. More cooking.
           </h2>
         </div>

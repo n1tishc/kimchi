@@ -111,7 +111,7 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
           </p>
           <h1
             id="stage-title"
-            className="max-w-[13ch] m-0 font-bold text-[clamp(2.85rem,5vw,4.8rem)] max-[760px]:text-[clamp(2.65rem,10vw,4.15rem)] tracking-[-0.03em] leading-[.84] text-balance"
+            className="max-w-[13ch] m-0 font-bold text-[clamp(2.85rem,5vw,4.8rem)] max-[760px]:text-[clamp(2.65rem,10vw,4.15rem)] tracking-tight leading-[.84] text-balance"
           >
             {currentStep.title}
           </h1>
@@ -154,7 +154,7 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
             <div className="grid grid-cols-[auto_minmax(0,1fr)] max-[480px]:grid-cols-1 items-start gap-4 max-[480px]:gap-3 pt-4">
               <BackLink onClick={() => goTo('ingredients', 'back')}>Ingredients</BackLink>
               <div className="min-w-0">
-                <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-[-0.03em] leading-[.95]">
+                <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-tight leading-[.95]">
                   Pick tonight&apos;s plot twist.
                 </h2>
                 <p className="max-w-[54ch] m-0 text-ink-soft text-[.94rem] leading-[1.55]">

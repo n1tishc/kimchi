@@ -58,7 +58,7 @@ export function Hero({ onStartCooking }) {
         </p>
         <h1
           id="home-title"
-          className="max-w-[10.5ch] m-0 font-bold text-[clamp(3.6rem,7.4vw,6.9rem)] max-[760px]:text-[clamp(3.4rem,15vw,5.5rem)] max-[480px]:text-[clamp(3.25rem,15.5vw,4.8rem)] tracking-[-0.03em] leading-[.84] text-balance"
+          className="max-w-[10.5ch] m-0 font-bold text-[clamp(3.6rem,7.4vw,6.9rem)] max-[760px]:text-[clamp(3.4rem,15vw,5.5rem)] max-[480px]:text-[clamp(3.25rem,15.5vw,4.8rem)] tracking-tight leading-[.84] text-balance"
         >
           Dinner, from the things already staring at you.
         </h1>
@@ -68,7 +68,7 @@ export function Hero({ onStartCooking }) {
         <Button variant="primary" className="mt-[29px]" onClick={onStartCooking}>
           Let&apos;s see the fridge <ArrowRightIcon />
         </Button>
-        <p className="mt-[13px] text-ink-faint font-mono text-[.67rem]">
+        <p className="mt-[13px] text-ink-faint text-[.72rem] font-medium">
           Takes about a minute. Chef&apos;s promise.
         </p>
       </div>

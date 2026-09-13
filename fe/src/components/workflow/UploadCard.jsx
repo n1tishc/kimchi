@@ -10,7 +10,7 @@ export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, er
   return (
     <Card as="section" className="grid gap-[26px] p-[clamp(22px,4vw,38px)] max-[480px]:p-[22px]" aria-label="Upload ingredients">
       <div className="grid gap-[7px]">
-        <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-[-0.03em] leading-[.95]">
+        <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-tight leading-[.95]">
           Show the chef your haul.
         </h2>
         <p className="max-w-[54ch] m-0 text-ink-soft text-[.94rem] leading-[1.55]">

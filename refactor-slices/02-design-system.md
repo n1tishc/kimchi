@@ -30,4 +30,13 @@
 - **Left-aligned text** was already true of the existing copy; no change needed beyond leaving the upload dropzone's icon+label stack centered (that's a centered icon widget, not hero/heading copy).
 - **Radius scope**: 12px/8px/pill radii were applied only to things the criteria name (buttons, cards, inputs, chips/badges). Decorative boxes not covered by any bullet (the upload dropzone shell, the hero SVG frame) were left square-cornered rather than rounded-ified by inference.
 
+### Review-driven fixes
+
+A two-axis code review against this slice's own criteria (not just the interpreted calls above) caught two real gaps in the first pass, both fixed:
+
+- **Mono/uppercase leftovers**: this slice's own typography criterion says "Mono for badges and step numbers only" — stricter than main spec §3.3's broader "badges, step numbers, technical stats." The first pass missed several non-badge, non-step-number spots still carrying `font-mono`/`uppercase`: the ingredient-editor's "Cuisine" label, the recipe meta pills (servings/time/difficulty), the "Level up:" inline label, and two plain captions (`RecipePicker`'s time/difficulty line, `Hero`'s "Takes about a minute" line). All converted to plain sans body text. Left as mono: `Badge.jsx`, the `Stepper`'s step numbers, `HowItWorks`'s phase numbers, and `RecipePicker`'s `#1/#2/#3` index marker (a numeric index in the same spirit as a step number).
+- **Repeated tracking value**: the new `-0.03em` heading tracking (§3.3) had landed as a raw arbitrary Tailwind value (`tracking-[-0.03em]`) repeated verbatim across 8 files instead of as a token — flagged as Primitive Obsession. Extracted into `--tracking-tight: -0.03em` in `app.css`'s `@theme` (overriding Tailwind's default `tracking-tight` value), and every site now uses the plain `tracking-tight` utility.
+
+Left unfixed (judgement call, not urgent): `HowItWorks`'s and `RecipePicker`'s hover-lift treatment (`hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,.1)]`) converged to the same value across those two files. Only 2 occurrences — a `<Card as="button">` composition would be the natural fix, but that's a component-structure change beyond this token-migration slice.
+
 **Verification caveat**: the Chrome browser extension was unavailable again this session ("Browser extension is not connected"), so this was verified via `npm run build`/`npm run lint`, and by grepping the generated CSS bundle to confirm the new fonts (Inter, JetBrains Mono) and hex values actually compiled in — not by an actual rendered/visual pass. Since this slice is purely visual, that's a materially weaker verification than usual. Please do a manual pass with `npm run dev` + `?demo=1` across desktop/tablet/mobile before merging.
