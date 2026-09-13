@@ -22,7 +22,7 @@ function RecipeSection({ title, children }) {
 
 function MetaPill({ icon, children }) {
   return (
-    <span className="inline-flex items-center gap-[6px] px-2 py-[5px] text-ink-soft bg-sunken border border-line text-[.72rem] font-medium">
+    <span className="inline-flex items-center gap-[6px] px-2.5 py-[5px] rounded-[20px] text-ink-soft bg-sunken border border-line text-[.72rem] font-medium">
       {icon}
       {children}
     </span>
