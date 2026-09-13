@@ -24,7 +24,8 @@ export function HomePage({ hidden, onStartCooking }) {
           <SparkIcon className="w-[53px] h-[53px] stroke-current stroke-[2.2] [stroke-linecap:round]" />
         </div>
         <div>
-          <p className="mb-3 text-tomato text-[.8rem] font-bold">
+          <p className="flex items-center gap-2 mb-3 text-tomato text-[.8rem] font-bold">
+            <span className="font-mono text-ink-soft" aria-hidden="true">04</span>
             Built for “what even is dinner?” nights
           </p>
           <h2 className="max-w-[11ch] m-0 font-bold text-[clamp(2.6rem,5vw,4.6rem)] max-[480px]:text-[2.45rem] tracking-tight leading-[.9] text-balance">

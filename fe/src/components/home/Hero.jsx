@@ -1,12 +1,15 @@
 import { ArrowRightIcon } from '../../icons/ArrowRightIcon'
+import { DEMO_ITEMS } from '../../lib/demo'
 import { Button } from '../ui/Button'
 
-const PREVIEW_INGREDIENTS = ['Chicken', 'Peppers', 'Potatoes', 'Tomato']
+// Reuses the same fixture the real `?demo=1` walkthrough scans, so the mockup
+// below can never drift from what the app actually detects.
+const PREVIEW_INGREDIENTS = DEMO_ITEMS.map((item) => item[0].toUpperCase() + item.slice(1))
 
 function StepDivider() {
   return (
-    <span className="mx-auto text-ink-faint text-xs leading-none" aria-hidden="true">
-      ↓
+    <span className="mx-auto text-ink-faint rotate-90 [&>svg]:size-3" aria-hidden="true">
+      <ArrowRightIcon />
     </span>
   )
 }
@@ -23,11 +26,15 @@ function ProductPreview() {
         <span className="size-2.5 rounded-full bg-line" />
       </div>
 
-      <div className="grid gap-2.5 p-3 bg-cobalt-wash rounded-lg">
-        <span className="text-ink-soft text-[.72rem] font-bold">Drop a photo</span>
-        <span className="inline-flex w-fit px-2.5 py-1 text-white bg-ink-fixed text-[.68rem] font-bold rounded-lg">
-          Choose file
-        </span>
+      <div className="grid gap-2 p-3 bg-cobalt-wash rounded-lg overflow-hidden">
+        <img
+          className="block w-full h-[74px] rounded-md object-cover"
+          src="/hero-slab.jpg"
+          width="480"
+          height="480"
+          alt=""
+        />
+        <span className="text-ink-soft text-[.68rem] font-bold">Straight off the counter — a real scan, not a mockup</span>
       </div>
 
       <StepDivider />

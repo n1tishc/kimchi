@@ -15,10 +15,10 @@ const PIPELINE = [
 ]
 
 const STATS = [
-  { value: '82%', label: 'recall' },
-  { value: '51', label: 'ingredient classes' },
+  { value: '353', label: 'ingredient classes (V2 vocabulary)', wide: true },
+  { value: '82%', label: 'recall — V1, 51-class eval' },
   { value: 'LoRA', label: 'fine-tuned SmolVLM2-500M' },
-  { value: '<30s', label: 'end-to-end' },
+  { value: '<30s', label: 'end-to-end', wide: true },
 ]
 
 function PipelineArrow() {
@@ -58,10 +58,14 @@ export function TechShowcase() {
         ))}
       </div>
 
-      <div className="grid grid-cols-4 max-[760px]:grid-cols-2 max-[480px]:grid-cols-1 gap-6 mt-6">
+      <div className="grid grid-cols-3 max-[760px]:grid-cols-1 gap-6 mt-6">
         {STATS.map((stat) => (
-          <Card className="p-5" key={stat.label}>
-            <p className="m-0 font-mono text-[1.9rem] font-bold text-tomato tracking-tight leading-none">
+          <Card className={`p-5 ${stat.wide ? 'col-span-2 max-[760px]:col-span-1' : ''}`} key={stat.label}>
+            <p
+              className={`m-0 font-mono font-bold text-tomato tracking-tight leading-none ${
+                stat.wide ? 'text-[2.4rem]' : 'text-[1.9rem]'
+              }`}
+            >
               {stat.value}
             </p>
             <p className="m-0 mt-2 text-ink-soft text-[.8rem] font-medium leading-snug">{stat.label}</p>
