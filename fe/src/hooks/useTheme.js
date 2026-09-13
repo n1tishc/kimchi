@@ -14,6 +14,10 @@ function readStoredTheme() {
   }
 }
 
+function resolveIsDark(theme, systemPrefersDark) {
+  return theme === 'dark' || (theme === 'system' && systemPrefersDark)
+}
+
 // Plain hooks/*.js files aren't run through the JSX loader, so this returns
 // the provider via createElement rather than JSX.
 export function ThemeProvider({ children }) {
@@ -29,16 +33,16 @@ export function ThemeProvider({ children }) {
     return () => media.removeEventListener('change', onChange)
   }, [])
 
-  const isDark = theme === 'dark' || (theme === 'system' && systemPrefersDark)
+  const isDark = resolveIsDark(theme, systemPrefersDark)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark)
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#141414' : '#FAFAF7')
   }, [isDark])
 
   const toggleTheme = useCallback(() => {
     setTheme((current) => {
-      const currentlyDark = current === 'dark' || (current === 'system' && systemPrefersDark)
-      const next = currentlyDark ? 'light' : 'dark'
+      const next = resolveIsDark(current, systemPrefersDark) ? 'light' : 'dark'
       try {
         localStorage.setItem(STORAGE_KEY, next)
       } catch {

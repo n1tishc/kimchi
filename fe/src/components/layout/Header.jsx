@@ -1,4 +1,4 @@
-import { useTheme } from '../../hooks/useTheme.js'
+import { useTheme } from '../../hooks/useTheme'
 import { ThemeToggle } from '../ui/ThemeToggle'
 
 export function Header({ view, onGoHome, onPrimaryAction }) {
