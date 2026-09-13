@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ScanIcon } from '../icons/ScanIcon'
 import { API_URL, REQUEST_TIMEOUT_MS } from '../lib/api'
 import { PHASES, STEPS } from '../lib/constants'
@@ -17,9 +18,9 @@ import { UploadCard } from '../components/workflow/UploadCard'
 
 export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) {
   const [phase, setPhase] = useState('upload')
-  const [direction, setDirection] = useState('forward')
   const [items, setItems] = useState([])
   const [draft, setDraft] = useState('')
+  const prefersReducedMotion = useReducedMotion()
 
   const imageUpload = useImageUpload({ demoMode: DEMO_MODE, demoImage: DEMO_IMAGE })
   const scan = useScan({
@@ -35,8 +36,7 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
     timeoutMs: REQUEST_TIMEOUT_MS,
   })
 
-  function goTo(next, dir = 'forward') {
-    setDirection(dir)
+  function goTo(next) {
     setPhase(next)
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -86,7 +86,7 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
     if (items.length === 0) return
     goTo('recipes')
     const result = await recipesHook.getRecipes(items, cuisine)
-    if (!result.ok && !result.aborted) goTo('ingredients', 'back')
+    if (!result.ok && !result.aborted) goTo('ingredients')
   }
 
   const selectedRecipe = recipesHook.recipes?.[recipesHook.selectedIndex] ?? null
@@ -121,73 +121,102 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
 
       <Stepper activeStep={activeStep} />
 
-      <div className={direction === 'back' ? 'animate-settle-back' : 'animate-settle'} key={phase}>
-        {phase === 'upload' && (
-          <UploadCard
-            preview={imageUpload.preview}
-            onPick={handlePick}
-            onScan={handleScan}
-            scanDisabled={scanDisabled}
-            scanning={scan.loading}
-            error={scan.error}
-          />
-        )}
+      {/* mode="wait": criterion wants the outgoing phase to finish fading out before the next fades in */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={phase}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 12 }}
+          animate={{ opacity: 1, y: 0, transition: { duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' } }}
+          exit={{ opacity: 0, transition: { duration: prefersReducedMotion ? 0 : 0.15, ease: 'easeOut' } }}
+        >
+          {phase === 'upload' && (
+            <UploadCard
+              preview={imageUpload.preview}
+              onPick={handlePick}
+              onScan={handleScan}
+              scanDisabled={scanDisabled}
+              scanning={scan.loading}
+              error={scan.error}
+            />
+          )}
 
-        {phase === 'ingredients' && (
-          <IngredientEditor
-            items={items}
-            draft={draft}
-            cuisine={cuisine}
-            recipeLoading={recipesHook.loading}
-            recipeError={recipesHook.error}
-            onBack={() => goTo('upload', 'back')}
-            onRemoveItem={removeItem}
-            onDraftChange={setDraft}
-            onAddItem={addItem}
-            onCuisineChange={changeCuisine}
-            onGetRecipes={handleGetRecipes}
-          />
-        )}
+          {phase === 'ingredients' && (
+            <IngredientEditor
+              items={items}
+              draft={draft}
+              cuisine={cuisine}
+              recipeLoading={recipesHook.loading}
+              recipeError={recipesHook.error}
+              onBack={() => goTo('upload')}
+              onRemoveItem={removeItem}
+              onDraftChange={setDraft}
+              onAddItem={addItem}
+              onCuisineChange={changeCuisine}
+              onGetRecipes={handleGetRecipes}
+            />
+          )}
 
-        {phase === 'recipes' && (
-          <section className="grid gap-[18px]" aria-label="Recipe suggestions">
-            <div className="grid grid-cols-[auto_minmax(0,1fr)] max-[480px]:grid-cols-1 items-start gap-4 max-[480px]:gap-3 pt-4">
-              <BackLink onClick={() => goTo('ingredients', 'back')}>Ingredients</BackLink>
-              <div className="min-w-0">
-                <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-tight leading-[.95]">
-                  Pick tonight&apos;s plot twist.
-                </h2>
-                <p className="max-w-[54ch] m-0 text-ink-soft text-[.94rem] leading-[1.55]">
-                  {recipesHook.loading
-                    ? 'Cooking up three ideas from your ingredients...'
-                    : 'Three ways to cook what you have. Pick one to see the full method.'}
-                </p>
+          {phase === 'recipes' && (
+            <section className="grid gap-[18px]" aria-label="Recipe suggestions">
+              <div className="grid grid-cols-[auto_minmax(0,1fr)] max-[480px]:grid-cols-1 items-start gap-4 max-[480px]:gap-3 pt-4">
+                <BackLink onClick={() => goTo('ingredients')}>Ingredients</BackLink>
+                <div className="min-w-0">
+                  <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-tight leading-[.95]">
+                    Pick tonight&apos;s plot twist.
+                  </h2>
+                  <p className="max-w-[54ch] m-0 text-ink-soft text-[.94rem] leading-[1.55]">
+                    {recipesHook.loading
+                      ? 'Cooking up three ideas from your ingredients...'
+                      : 'Three ways to cook what you have. Pick one to see the full method.'}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {recipesHook.loading ? (
-              <RecipeSkeleton />
-            ) : !recipesHook.recipes || recipesHook.recipes.length === 0 ? (
-              <p className="p-6 bg-surface border border-line text-ink-soft leading-[1.5]">No recipes returned.</p>
-            ) : (
-              <>
-                <RecipePicker
-                  recipes={recipesHook.recipes}
-                  selectedIndex={recipesHook.selectedIndex}
-                  onSelect={recipesHook.setSelectedIndex}
-                />
+              {/* default (sync) mode: criterion wants the skeleton and incoming content to overlap */}
+              <div className="grid *:[grid-area:1/1]">
+                <AnimatePresence>
+                  {recipesHook.loading && (
+                    <motion.div
+                      key="skeleton"
+                      exit={{ opacity: 0, transition: { duration: prefersReducedMotion ? 0 : 0.15, ease: 'easeOut' } }}
+                    >
+                      <RecipeSkeleton />
+                    </motion.div>
+                  )}
+                  {!recipesHook.loading && (
+                    <motion.div
+                      key="content"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1, transition: { duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' } }}
+                    >
+                      {!recipesHook.recipes || recipesHook.recipes.length === 0 ? (
+                        <p className="p-6 bg-surface border border-line text-ink-soft leading-[1.5]">
+                          No recipes returned.
+                        </p>
+                      ) : (
+                        <div className="grid gap-[18px]">
+                          <RecipePicker
+                            recipes={recipesHook.recipes}
+                            selectedIndex={recipesHook.selectedIndex}
+                            onSelect={recipesHook.setSelectedIndex}
+                          />
 
-                {selectedRecipe && <RecipeDetail recipe={selectedRecipe} key={recipesHook.selectedIndex} />}
+                          {selectedRecipe && <RecipeDetail recipe={selectedRecipe} key={recipesHook.selectedIndex} />}
 
-                <Button variant="ghost" className="mt-1" onClick={onStartOver}>
-                  <ScanIcon />
-                  Scan new ingredients
-                </Button>
-              </>
-            )}
-          </section>
-        )}
-      </div>
+                          <Button variant="ghost" className="mt-1" onClick={onStartOver}>
+                            <ScanIcon />
+                            Scan new ingredients
+                          </Button>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </section>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </main>
   )
 }

@@ -4,7 +4,6 @@ import { UploadIcon } from '../../icons/UploadIcon'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
 import { ErrorNote } from '../ui/ErrorNote'
-import { Spinner } from '../ui/Spinner'
 
 export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, error }) {
   return (
@@ -75,14 +74,17 @@ export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, er
 
         <Button
           variant="primary"
-          className="max-[480px]:w-full"
+          className={`max-[480px]:w-full ${scanning ? 'relative overflow-hidden' : ''}`}
           onClick={onScan}
           disabled={scanDisabled}
         >
           {scanning ? (
             <>
-              <Spinner />
-              Scanning...
+              <span
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer"
+                aria-hidden="true"
+              />
+              <span className="relative">Scanning...</span>
             </>
           ) : (
             <>
@@ -94,12 +96,9 @@ export function UploadCard({ preview, onPick, onScan, scanDisabled, scanning, er
       </div>
 
       {scanning && (
-        <div className="flex items-center gap-2.5 text-ink-soft text-[.82rem]" role="status">
-          <span className="block w-[52px] h-[3px] overflow-hidden bg-line" aria-hidden="true">
-            <span className="block w-[45%] h-full bg-tomato animate-scan" />
-          </span>
+        <p className="text-ink-soft text-[.82rem]" role="status">
           Reading your photo with the vision model...
-        </div>
+        </p>
       )}
 
       {error && <ErrorNote>{error}</ErrorNote>}

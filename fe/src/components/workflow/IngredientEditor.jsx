@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { ChevronIcon } from '../../icons/ChevronIcon'
 import { CUISINES } from '../../lib/constants'
 import { BackLink } from '../ui/BackLink'
@@ -20,6 +21,10 @@ export function IngredientEditor({
   onCuisineChange,
   onGetRecipes,
 }) {
+  // Only the initially-detected batch staggers in; ingredients added later via
+  // the form should appear immediately rather than queueing behind a delay.
+  const detectedCount = useRef(items.length).current
+
   return (
     <Card as="section" className="grid gap-[21px] p-[clamp(22px,4vw,38px)] max-[480px]:p-[22px]" aria-label="Detected ingredients">
       <div className="grid grid-cols-[auto_minmax(0,1fr)] max-[480px]:grid-cols-1 items-start gap-4 max-[480px]:gap-3">
@@ -38,8 +43,13 @@ export function IngredientEditor({
         <p className="m-0 text-ink-soft leading-[1.5]">No ingredients detected — try a clearer photo.</p>
       ) : (
         <ul className="flex flex-wrap gap-2 m-0 p-0 list-none">
-          {items.map((ingredient) => (
-            <Chip key={ingredient} label={ingredient} onRemove={() => onRemoveItem(ingredient)} />
+          {items.map((ingredient, index) => (
+            <Chip
+              key={ingredient}
+              label={ingredient}
+              staggerIndex={index < detectedCount ? index : 0}
+              onRemove={() => onRemoveItem(ingredient)}
+            />
           ))}
         </ul>
       )}
