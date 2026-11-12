@@ -1,5 +1,4 @@
 import { ArrowRightIcon } from '../icons/ArrowRightIcon'
-import { SparkIcon } from '../icons/SparkIcon'
 import { Hero } from '../components/home/Hero'
 import { HowItWorks } from '../components/home/HowItWorks'
 import { TechShowcase } from '../components/home/TechShowcase'
@@ -7,35 +6,42 @@ import { Button } from '../components/ui/Button'
 
 export function HomePage({ hidden, onStartCooking }) {
   return (
-    <main
-      className="pt-[clamp(42px,8vw,86px)] max-[480px]:pt-[31px]"
-      id="home"
-      hidden={hidden}
-    >
+    <main id="home" hidden={hidden}>
       <Hero onStartCooking={onStartCooking} />
       <TechShowcase />
       <HowItWorks onSelectPhase={onStartCooking} />
 
-      <section className="grid grid-cols-[175px_minmax(0,1fr)_auto] max-[760px]:grid-cols-[130px_1fr] max-[480px]:grid-cols-[105px_1fr] items-center gap-[clamp(25px,5vw,64px)] max-[760px]:gap-3.5 mt-[clamp(82px,12vw,150px)] py-[30px] border-y border-line">
-        <div
-          className="grid size-[104px] max-[760px]:size-[94px] max-[480px]:size-[78px] place-items-center text-tomato bg-gold border border-line shadow-soft -rotate-6"
-          aria-hidden="true"
-        >
-          <SparkIcon className="w-[53px] h-[53px] stroke-current stroke-[2.2] [stroke-linecap:round]" />
-        </div>
-        <div>
-          <p className="flex items-center gap-2 mb-3 text-tomato text-[.8rem] font-bold">
-            <span className="font-mono text-ink-soft" aria-hidden="true">04</span>
-            Built for “what even is dinner?” nights
-          </p>
-          <h2 className="max-w-[11ch] m-0 font-bold text-[clamp(2.6rem,5vw,4.6rem)] max-[480px]:text-[2.45rem] tracking-tight leading-[.9] text-balance">
+      <section className="cloth grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)] max-[760px]:grid-cols-1" aria-labelledby="close-title">
+        <div className="patch tone-hong pad-lg">
+          <p className="m-0 mb-5 text-[1.05rem] font-bold">Built for &ldquo;what even is dinner?&rdquo; nights</p>
+          <h2 id="close-title" className="display m-0 max-w-[11ch] text-[clamp(2.4rem,5vw,4.4rem)]">
             Less figuring out. More cooking.
           </h2>
         </div>
-        <Button className="max-[760px]:col-span-2 max-[760px]:w-full" onClick={onStartCooking}>
-          Start with a photo <ArrowRightIcon />
-        </Button>
+        <div className="patch pad grid content-end gap-4">
+          <p className="m-0 text-[1.1rem] font-bold leading-[1.35]">One photo is all it needs to start.</p>
+          <Button variant="ink" className="btn-lg w-full" onClick={onStartCooking}>
+            Start with a photo <ArrowRightIcon />
+          </Button>
+        </div>
       </section>
+
+      <footer className="cloth grid-cols-[minmax(0,1fr)_auto_auto] max-[760px]:grid-cols-1">
+        <p className="patch m-0 px-5 py-4 text-ink-soft text-[.92rem]">
+          Kimchi is a portfolio project: a fine-tuned vision model, a FastAPI backend and this React frontend.
+        </p>
+        <a className="patch link px-5 py-4" href="https://github.com/n1tishc/kimchi" target="_blank" rel="noreferrer">
+          Source on GitHub
+        </a>
+        <a
+          className="patch link px-5 py-4"
+          href="https://huggingface.co/LongGrainRice/kimchi-test"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Model card
+        </a>
+      </footer>
     </main>
   )
 }

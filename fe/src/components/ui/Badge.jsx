@@ -1,14 +1,11 @@
-const TYPE_STYLES = {
-  detected: 'text-tomato bg-tomato-wash border-l-tomato',
-  pantry: 'text-leaf bg-leaf-wash border-l-leaf',
-  extra: 'text-gold-ink bg-gold-wash border-l-gold',
-}
+import { INGREDIENT_TYPE_MARKS } from '../../lib/constants'
 
+// The ingredient-type mark: a dyed square beside the type's name. Same dye
+// everywhere a type appears.
 export function Badge({ type, className = '', children }) {
   return (
-    <span
-      className={`flex-none rounded-r-[20px] border-l-[3px] px-2.5 py-1 text-[.76rem] font-bold ${TYPE_STYLES[type]} ${className}`.trim()}
-    >
+    <span className={`inline-flex items-center gap-2.5 font-extrabold text-[1.05rem] ${className}`.trim()}>
+      <span className="group-mark" style={{ '--mark': INGREDIENT_TYPE_MARKS[type] }} aria-hidden="true" />
       {children}
     </span>
   )

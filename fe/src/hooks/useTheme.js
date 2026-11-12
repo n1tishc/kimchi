@@ -37,7 +37,7 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark)
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#141414' : '#FAFAF7')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#0B0D18' : '#E7E1D1')
   }, [isDark])
 
   const toggleTheme = useCallback(() => {

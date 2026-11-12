@@ -21,6 +21,7 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
   const [phase, setPhase] = useState('upload')
   const [items, setItems] = useState([])
   const [draft, setDraft] = useState('')
+  const [scanNote, setScanNote] = useState(null)
   const prefersReducedMotion = useReducedMotion()
 
   const imageUpload = useImageUpload({ demoMode: DEMO_MODE, demoImage: DEMO_IMAGE })
@@ -46,19 +47,38 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
     setItems([])
     setDraft('')
     recipesHook.reset()
-    const result = await scan.scan(imageUpload.file)
+    setScanNote(null)
+    const total = imageUpload.files.length
+    const result = await scan.scan(imageUpload.files)
     if (result) {
-      setItems(result)
+      setItems(result.items)
+      if (result.failed > 0) {
+        setScanNote(
+          `${result.failed} of ${total} photos couldn't be read, so some ingredients may be missing. Add them below.`,
+        )
+      }
       goTo('ingredients')
     }
   }
 
-  function handlePick(nextFile) {
-    imageUpload.pick(nextFile)
+  // Any change to the photo set invalidates what was scanned from the old one.
+  function clearScanResults() {
     setItems([])
     setDraft('')
+    setScanNote(null)
     scan.reset()
     recipesHook.reset()
+  }
+
+  function handleAddPhotos(fileList) {
+    const outcome = imageUpload.add(fileList)
+    if (outcome.added > 0) clearScanResults()
+    return outcome
+  }
+
+  function handleRemovePhoto(id) {
+    imageUpload.remove(id)
+    clearScanResults()
   }
 
   function addItem(event) {
@@ -93,50 +113,41 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
   const selectedRecipe = recipesHook.recipes?.[recipesHook.selectedIndex] ?? null
   const activeStep = PHASES.indexOf(phase)
   const currentStep = STEPS[activeStep]
-  const scanDisabled = (!imageUpload.file && !DEMO_MODE) || scan.loading
+  const scanDisabled = (imageUpload.files.length === 0 && !DEMO_MODE) || scan.loading
 
   return (
-    <main
-      id="workflow"
-      tabIndex="-1"
-      className="pt-[clamp(32px,6vw,68px)] outline-none"
-      hidden={hidden}
-    >
-      <section
-        className="grid items-center min-h-[270px] max-[760px]:min-h-[230px] mb-[26px] px-[clamp(2px,3vw,34px)] overflow-hidden bg-cobalt-wash border border-line shadow-soft"
-        aria-labelledby="stage-title"
-      >
-        <div className="relative z-[2] py-7">
-          <p className="mb-3 text-tomato text-[.8rem] font-bold">
+    <main id="workflow" tabIndex="-1" className="outline-none" hidden={hidden}>
+      <Stepper activeStep={activeStep} />
+
+      <section className="cloth" aria-labelledby="stage-title">
+        <div className="patch pad">
+          <p className="m-0 mb-3 text-hong font-bold">
             {currentStep.number} · {currentStep.label}
           </p>
-          <h1
-            id="stage-title"
-            className="max-w-[13ch] m-0 font-bold text-[clamp(2.85rem,5vw,4.8rem)] max-[760px]:text-[clamp(2.65rem,10vw,4.15rem)] tracking-tight leading-[.84] text-balance"
-          >
+          <h1 id="stage-title" className="display m-0 max-w-[13ch] text-[clamp(2.1rem,4.2vw,3.4rem)]">
             {currentStep.title}
           </h1>
-          <p className="max-w-[48ch] mt-4 text-ink-soft text-[.94rem] leading-[1.5]">{currentStep.description}</p>
+          <p className="lede mt-3 mb-0 text-ink-soft">{currentStep.description}</p>
         </div>
       </section>
-
-      <Stepper activeStep={activeStep} />
 
       {/* mode="wait": criterion wants the outgoing phase to finish fading out before the next fades in */}
       <AnimatePresence mode="wait">
         <motion.div
           key={phase}
-          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 12 }}
-          animate={{ opacity: 1, y: 0, transition: reducedTransition(prefersReducedMotion, { duration: 0.2, ease: 'easeOut' }) }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 16 }}
+          animate={{ opacity: 1, y: 0, transition: reducedTransition(prefersReducedMotion, { duration: 0.24, ease: 'easeOut' }) }}
           exit={{ opacity: 0, transition: reducedTransition(prefersReducedMotion, { duration: 0.15, ease: 'easeOut' }) }}
         >
           {phase === 'upload' && (
             <UploadCard
-              preview={imageUpload.preview}
-              onPick={handlePick}
+              photos={imageUpload.photos}
+              onAdd={handleAddPhotos}
+              onRemove={handleRemovePhoto}
               onScan={handleScan}
               scanDisabled={scanDisabled}
               scanning={scan.loading}
+              progress={scan.progress}
               error={scan.error}
             />
           )}
@@ -148,6 +159,7 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
               cuisine={cuisine}
               recipeLoading={recipesHook.loading}
               recipeError={recipesHook.error}
+              scanNote={scanNote}
               onBack={() => goTo('upload')}
               onRemoveItem={removeItem}
               onDraftChange={setDraft}
@@ -158,16 +170,14 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
           )}
 
           {phase === 'recipes' && (
-            <section className="grid gap-[18px]" aria-label="Recipe suggestions">
-              <div className="grid grid-cols-[auto_minmax(0,1fr)] max-[480px]:grid-cols-1 items-start gap-4 max-[480px]:gap-3 pt-4">
-                <BackLink onClick={() => goTo('ingredients')}>Ingredients</BackLink>
-                <div className="min-w-0">
-                  <h2 className="m-0 font-bold text-[clamp(2.15rem,4vw,3rem)] tracking-tight leading-[.95]">
-                    Pick tonight&apos;s plot twist.
-                  </h2>
-                  <p className="max-w-[54ch] m-0 text-ink-soft text-[.94rem] leading-[1.55]">
+            <section aria-label="Recipe suggestions">
+              <div className="cloth">
+                <div className="patch pad grid gap-3">
+                  <BackLink onClick={() => goTo('ingredients')}>Ingredients</BackLink>
+                  <h2 className="display h-block m-0">Pick tonight&apos;s plot twist.</h2>
+                  <p className="max-w-[54ch] m-0 text-ink-soft leading-[1.55]">
                     {recipesHook.loading
-                      ? 'Cooking up three ideas from your ingredients...'
+                      ? 'Stitching three ideas together from your ingredients...'
                       : 'Three ways to cook what you have. Pick one to see the full method.'}
                   </p>
                 </div>
@@ -191,11 +201,11 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
                       animate={{ opacity: 1, transition: reducedTransition(prefersReducedMotion, { duration: 0.2, ease: 'easeOut' }) }}
                     >
                       {!recipesHook.recipes || recipesHook.recipes.length === 0 ? (
-                        <p className="p-6 bg-surface border border-line text-ink-soft leading-[1.5]">
-                          No recipes returned.
-                        </p>
+                        <div className="cloth">
+                          <p className="patch pad m-0 leading-[1.5]">No recipes returned.</p>
+                        </div>
                       ) : (
-                        <div className="grid gap-[18px]">
+                        <>
                           <RecipePicker
                             recipes={recipesHook.recipes}
                             selectedIndex={recipesHook.selectedIndex}
@@ -203,14 +213,22 @@ export function WorkflowPage({ hidden, onStartOver, cuisine, onCuisineChange }) 
                           />
 
                           {selectedRecipe && (
-                            <RecipeDetail recipe={selectedRecipe} key={recipesHook.selectedIndex} active={!hidden} />
+                            <RecipeDetail
+                              recipe={selectedRecipe}
+                              key={recipesHook.selectedIndex}
+                              active={!hidden}
+                            />
                           )}
 
-                          <Button variant="ghost" className="mt-1" onClick={onStartOver}>
-                            <ScanIcon />
-                            Scan new ingredients
-                          </Button>
-                        </div>
+                          <div className="cloth">
+                            <div className="patch pad">
+                              <Button onClick={onStartOver}>
+                                <ScanIcon />
+                                Scan new ingredients
+                              </Button>
+                            </div>
+                          </div>
+                        </>
                       )}
                     </motion.div>
                   )}

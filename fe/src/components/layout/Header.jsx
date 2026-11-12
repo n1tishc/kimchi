@@ -5,39 +5,25 @@ export function Header({ view, onGoHome, onPrimaryAction }) {
   const { isDark, toggleTheme } = useTheme()
 
   return (
-    <header className="flex items-center justify-between min-h-[76px] max-[760px]:min-h-[65px] border-b border-line">
-      <button
-        className="inline-flex items-center gap-[9px] p-0 text-ink bg-transparent border-0 cursor-pointer text-[1.05rem] font-bold tracking-[-.04em] focus-visible:outline-3 focus-visible:outline-cobalt focus-visible:outline-offset-4"
-        type="button"
-        onClick={onGoHome}
-        aria-label="Kimchi home"
-      >
-        <span
-          className="grid size-[29px] place-items-center text-surface bg-tomato rounded-full text-[1.3rem] font-bold"
-          aria-hidden="true"
-        >
-          K
+    <header className="cloth header-cloth">
+      <button className="patch tone-hong gap-2.5 text-[1.25rem]" type="button" onClick={onGoHome} aria-label="Kimchi home">
+        <span className="display text-[1.5rem] leading-none">Kimchi</span>
+        <span className="font-hangul text-[1.1rem] font-normal" lang="ko" aria-hidden="true">
+          김치
         </span>
-        <span>Kimchi</span>
       </button>
-      <div className="flex items-center gap-5 max-[760px]:gap-[13px]">
-        {view === 'home' && (
-          <a
-            className="max-[480px]:hidden text-ink-soft text-[.82rem] font-semibold decoration-transparent transition-colors duration-150 hover:text-tomato hover:decoration-current focus-visible:outline-3 focus-visible:outline-cobalt focus-visible:outline-offset-4"
-            href="#how-it-works"
-          >
-            How it works
-          </a>
-        )}
-        <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
-        <button
-          className="min-h-[38px] max-[480px]:min-h-9 px-[13px] max-[480px]:px-2.5 rounded-xl text-ink-fixed bg-gold border border-line cursor-pointer text-[.76rem] font-bold transition-colors duration-150 hover:bg-[#d69a0f] focus-visible:outline-3 focus-visible:outline-cobalt focus-visible:outline-offset-4"
-          type="button"
-          onClick={onPrimaryAction}
-        >
-          {view === 'home' ? 'Start cooking' : 'New dish'}
-        </button>
+      <div className="patch header-fill text-ink-soft text-[.92rem]">
+        <span>Cooks from what you&apos;ve got</span>
       </div>
+      {view === 'home' && (
+        <a className="patch header-link" href="#how-it-works">
+          How it works
+        </a>
+      )}
+      <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
+      <button className="patch tone-ink" type="button" onClick={onPrimaryAction}>
+        {view === 'home' ? 'Start cooking' : 'New dish'}
+      </button>
     </header>
   )
 }

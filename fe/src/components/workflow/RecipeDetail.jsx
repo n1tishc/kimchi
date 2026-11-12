@@ -2,30 +2,24 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
-import { Callout } from '../ui/Callout'
-import { Card } from '../ui/Card'
+import { ArrowRightIcon } from '../../icons/ArrowRightIcon'
 import { ClockIcon } from '../../icons/ClockIcon'
 import { DifficultyIcon } from '../../icons/DifficultyIcon'
-import { NoteIcon } from '../../icons/NoteIcon'
 import { ServingsIcon } from '../../icons/ServingsIcon'
-import { SparkIcon } from '../../icons/SparkIcon'
 import { INGREDIENT_TYPE_LABELS, ingredientType } from '../../lib/constants'
 import { CookingMode } from './CookingMode'
 
 const INGREDIENT_GROUPS = ['detected', 'pantry', 'extra']
 
-function RecipeSection({ title, children }) {
-  return (
-    <section className="pt-8">
-      <h3 className="mt-0 mb-[13px] text-tomato text-[.75rem] font-bold">{title}</h3>
-      {children}
-    </section>
-  )
+const GROUP_HINT = {
+  detected: 'Seen in your photo',
+  pantry: 'Probably in the cupboard',
+  extra: 'Not on the counter yet',
 }
 
-function MetaPill({ icon, children }) {
+function Meta({ icon, children }) {
   return (
-    <span className="inline-flex items-center gap-[6px] px-2.5 py-[5px] rounded-[20px] text-ink-soft bg-sunken border border-line text-[.72rem] font-medium">
+    <span className="inline-flex items-center gap-2 text-[1rem] font-bold">
       {icon}
       {children}
     </span>
@@ -67,132 +61,134 @@ export function RecipeDetail({ recipe, active = true }) {
     if (!active) setCookingModeOpen(false)
   }, [active])
 
+  const groups = INGREDIENT_GROUPS.map((type) => ({
+    type,
+    items: (recipe.ingredients ?? []).filter((ingredient) => ingredientType(ingredient.type) === type),
+  })).filter((group) => group.items.length > 0)
+
   return (
-    <Card as="article" className="p-[clamp(24px,5vw,48px)] max-[480px]:p-[22px]">
-      <header className="pb-7 border-b border-line">
-        <h2 className="max-w-[18ch] m-0 font-bold text-[clamp(2.5rem,5vw,4.25rem)] max-[480px]:text-[2.5rem] tracking-tight leading-[.95] text-balance">
-          {recipe.title}
-        </h2>
-        <p className="max-w-[65ch] mt-[18px] mb-0 text-ink-soft leading-[1.6]">{recipe.summary}</p>
-        <div className="flex flex-wrap gap-[7px] mt-[19px]">
-          <MetaPill icon={<ServingsIcon />}>{recipe.servings} servings</MetaPill>
-          <MetaPill icon={<ClockIcon />}>{recipe.total_time_minutes} min</MetaPill>
-          <MetaPill icon={<DifficultyIcon />}>{recipe.difficulty}</MetaPill>
+    <article className="cloth recipe">
+      <header className="patch pad-lg">
+        <h2 className="display m-0 max-w-[17ch] text-[clamp(2.1rem,4.2vw,3.6rem)]">{recipe.title}</h2>
+        <p className="lede mt-4 mb-0 max-w-[62ch] text-ink-soft">{recipe.summary}</p>
+        <div className="flex flex-wrap items-center gap-x-7 gap-y-3 mt-7">
+          <Meta icon={<ServingsIcon />}>{recipe.servings} servings</Meta>
+          <Meta icon={<ClockIcon />}>{recipe.total_time_minutes} min</Meta>
+          <Meta icon={<DifficultyIcon />}>{recipe.difficulty}</Meta>
+          {hasSteps && (
+            <Button variant="primary" className="max-md:hidden ml-auto" onClick={openCookingMode} inert={cookingModeOpen || undefined}>
+              Cook step by step <ArrowRightIcon />
+            </Button>
+          )}
         </div>
       </header>
 
-      {recipe.ingredients?.length > 0 && (
-        <RecipeSection title="Ingredients">
-          {INGREDIENT_GROUPS.map((type) => {
-            const groupItems = recipe.ingredients.filter((ingredient) => ingredientType(ingredient.type) === type)
-            if (groupItems.length === 0) return null
-
-            return (
-              <div className="mt-5 first:mt-0" key={type}>
-                <h4 className="m-0 mb-1.5 text-ink-soft text-[.72rem] font-bold">{INGREDIENT_TYPE_LABELS[type]}</h4>
-                <ul className="m-0 p-0 list-none">
-                  {groupItems.map((ingredient, index) => (
-                    <li
-                      className="flex items-center max-[480px]:items-start justify-between gap-4 py-3 border-b border-line"
-                      key={`${ingredient.item}-${index}`}
-                    >
-                      <span className="grid min-w-0 gap-0.5">
-                        <strong className="text-[.95rem] font-bold capitalize">{ingredient.item}</strong>
-                        <small className="text-ink-soft text-[.82rem]">{ingredient.quantity}</small>
-                      </span>
-                      <Badge type={type} className="max-[480px]:mt-0.5">
-                        {INGREDIENT_TYPE_LABELS[type]}
-                      </Badge>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-          })}
-        </RecipeSection>
+      {groups.length > 0 && (
+        <section className="recipe-groups" aria-label="Ingredients">
+          {groups.map(({ type, items }) => (
+            <div className="patch pad" key={type}>
+              <h3 className="m-0">
+                <Badge type={type}>{INGREDIENT_TYPE_LABELS[type]}</Badge>
+              </h3>
+              <p className="m-0 mt-1 mb-4 text-ink-soft text-[.9rem]">{GROUP_HINT[type]}</p>
+              <ul className="m-0 p-0 list-none">
+                {items.map((ingredient, index) => (
+                  <li
+                    className="flex items-baseline justify-between gap-4 py-2.5 border-t-[1.5px] border-dashed border-ink/35"
+                    key={`${ingredient.item}-${index}`}
+                  >
+                    <strong className="font-bold capitalize leading-[1.3]">{ingredient.item}</strong>
+                    <span className="flex-none text-ink-soft text-[.92rem] text-right">{ingredient.quantity}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </section>
       )}
 
-      {recipe.equipment?.length > 0 && (
-        <RecipeSection title="Equipment">
-          <ul className="flex flex-wrap gap-2 m-0 p-0 list-none">
-            {recipe.equipment.map((item) => (
-              <li
-                className="px-[11px] py-[7px] rounded-[20px] border border-line text-ink-soft text-[.83rem] capitalize"
-                key={item}
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-        </RecipeSection>
-      )}
-
-      {recipe.steps?.length > 0 && (
-        <RecipeSection title="Steps">
-          <ol className="relative grid gap-8 m-0 p-0 list-none">
-            <span aria-hidden="true" className="absolute left-5 top-2 bottom-2 w-px bg-line" />
+      {hasSteps && (
+        <section className="patch pad-lg recipe-steps-patch" aria-labelledby="steps-title">
+          <h3 id="steps-title" className="display h-block m-0 mb-8">
+            Method
+          </h3>
+          <ol className="grid gap-10 m-0 p-0 list-none">
             {recipe.steps.map((step, index) => {
               const stepNumber = step.n ?? index + 1
               const done = completedSteps[index]
 
               return (
-                <li className="relative pl-14" key={step.n ?? index}>
-                  <span
-                    className="absolute left-0 top-0 w-10 bg-surface text-center font-mono text-[1.5rem] font-bold text-tomato leading-none"
-                    aria-hidden="true"
-                  >
+                <li className="grid grid-cols-[clamp(44px,6vw,72px)_minmax(0,1fr)] gap-x-4" key={step.n ?? index}>
+                  <span className="display step-num" aria-hidden="true">
                     {stepNumber}
                   </span>
-                  <label className="flex items-start gap-2.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="mt-[5px] size-4 flex-none accent-tomato cursor-pointer"
-                      checked={done}
-                      onChange={() => toggleStep(index)}
-                      aria-label={`Mark step ${stepNumber} as done`}
-                    />
-                    <p className={`m-0 leading-[1.6] ${done ? 'text-ink-soft line-through' : ''}`}>
-                      {step.instruction}
-                    </p>
-                  </label>
-                  {step.tip && (
-                    <Callout tone="leaf" icon={<NoteIcon />} className="mt-3 ml-[26px]">
-                      {step.tip}
-                    </Callout>
-                  )}
+                  <div className="grid gap-3.5">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="check"
+                        checked={done}
+                        onChange={() => toggleStep(index)}
+                        aria-label={`Mark step ${stepNumber} as done`}
+                      />
+                      <p className={`m-0 max-w-[62ch] text-[1.08rem] leading-[1.6] ${done ? 'text-ink-soft line-through' : ''}`}>
+                        {step.instruction}
+                      </p>
+                    </label>
+                    {step.tip && <p className="note m-0 ml-[34px] max-[480px]:ml-0 max-[480px]:flex-col max-[480px]:gap-1">{step.tip}</p>}
+                  </div>
                 </li>
               )
             })}
           </ol>
-        </RecipeSection>
+        </section>
       )}
 
-      {recipe.chef_tips?.length > 0 && (
-        <RecipeSection title="Chef tips">
-          <Callout tone="neutral" icon={<NoteIcon />}>
-            <ul className="grid gap-2 m-0 pl-4 list-disc marker:text-ink-faint text-ink-soft text-[.92rem] leading-[1.5]">
-              {recipe.chef_tips.map((tip) => (
-                <li key={tip}>{tip}</li>
+      <div className="recipe-side">
+        {recipe.equipment?.length > 0 && (
+          <section className="patch pad" aria-labelledby="equipment-title">
+            <h3 id="equipment-title" className="display m-0 mb-4 text-[1.5rem]">
+              Equipment
+            </h3>
+            <ul className="flex flex-wrap gap-2 m-0 p-0 list-none">
+              {recipe.equipment.map((item) => (
+                <li className="px-3 py-2 shadow-[inset_0_0_0_2px_var(--color-ink)] font-bold capitalize leading-none" key={item}>
+                  {item}
+                </li>
               ))}
             </ul>
-          </Callout>
-        </RecipeSection>
-      )}
+          </section>
+        )}
 
-      {recipe.level_up && (
-        <RecipeSection title="Level up">
-          <Callout tone="gold" icon={<SparkIcon className="size-[15px] stroke-current stroke-[2.5] [stroke-linecap:round]" />}>
-            {recipe.level_up}
-          </Callout>
-        </RecipeSection>
-      )}
+        {recipe.chef_tips?.length > 0 && (
+          <section className="patch pad" aria-labelledby="tips-title">
+            <h3 id="tips-title" className="display m-0 mb-4 text-[1.5rem]">
+              Chef tips
+            </h3>
+            <ul className="grid gap-3 m-0 p-0 list-none leading-[1.5]">
+              {recipe.chef_tips.map((tip) => (
+                <li className="pt-3 border-t-[1.5px] border-dashed border-ink/35" key={tip}>
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {recipe.level_up && (
+          <section className="patch stitch pad" aria-labelledby="levelup-title">
+            <h3 id="levelup-title" className="display m-0 mb-3 text-[1.5rem]">
+              Level up
+            </h3>
+            <p className="m-0 font-medium leading-[1.5]">{recipe.level_up}</p>
+          </section>
+        )}
+      </div>
 
       {hasSteps && (
         // Reserves the scroll space the fixed bar below occupies, so it never covers
         // the page's own trailing content ("Scan new ingredients" in WorkflowPage).
-        <div className="md:hidden mt-8 pt-3 pb-[max(12px,env(safe-area-inset-bottom))]" aria-hidden="true">
-          <div className="min-h-12" />
-        </div>
+        <div className="md:hidden patch min-h-[84px]" aria-hidden="true" />
       )}
 
       {hasSteps &&
@@ -202,11 +198,11 @@ export function RecipeDetail({ recipe, active = true }) {
           // full-screen overlay either way, but staying mounted keeps this exact DOM node
           // around for the focus-restore effect above to hand focus back to.
           <div
-            className="md:hidden fixed inset-x-0 bottom-0 z-40 px-3.5 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] bg-surface border-t border-line"
+            className="md:hidden fixed inset-x-0 bottom-0 z-40 p-[3px] pb-[max(3px,env(safe-area-inset-bottom))] bg-seam"
             inert={cookingModeOpen || undefined}
           >
-            <Button variant="primary" className="w-full" onClick={openCookingMode}>
-              Start cooking
+            <Button variant="primary" className="btn-lg w-full" onClick={openCookingMode}>
+              Start cooking <ArrowRightIcon />
             </Button>
           </div>,
           document.body,
@@ -220,6 +216,6 @@ export function RecipeDetail({ recipe, active = true }) {
           onExit={() => setCookingModeOpen(false)}
         />
       )}
-    </Card>
+    </article>
   )
 }
