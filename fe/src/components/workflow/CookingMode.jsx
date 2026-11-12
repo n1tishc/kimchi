@@ -3,9 +3,8 @@ import { createPortal } from 'react-dom'
 import { ArrowLeftIcon } from '../../icons/ArrowLeftIcon'
 import { ArrowRightIcon } from '../../icons/ArrowRightIcon'
 import { CloseIcon } from '../../icons/CloseIcon'
-import { NoteIcon } from '../../icons/NoteIcon'
 import { Button } from '../ui/Button'
-import { Callout } from '../ui/Callout'
+import { StepVisual } from './StepVisual'
 
 const SWIPE_THRESHOLD_PX = 50
 
@@ -121,28 +120,33 @@ export function CookingMode({ recipe, completedSteps, onToggleStep, onExit }) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 grid grid-rows-[auto_auto_minmax(0,1fr)_auto] bg-paper text-ink"
+      className="fixed inset-0 z-50 grid grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-[3px] p-[3px] bg-seam text-ink"
       role="dialog"
       aria-modal="true"
       aria-label={`Cooking ${recipe.title}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="h-1 bg-line" aria-hidden="true">
-        <div
-          className="h-full bg-tomato transition-[width] duration-200 ease-out"
-          style={{ width: `${((stepIndex + 1) / total) * 100}%` }}
-        />
+      {/* One stitch per step: sewn so far, the one in hand, and still to sew. */}
+      <div className="flex gap-[3px]" aria-hidden="true">
+        {steps.map((_, index) => (
+          <span
+            className={`h-3 flex-1 transition-colors duration-200 ${
+              index < stepIndex ? 'bg-ink-soft' : index === stepIndex ? 'bg-hong' : 'bg-ramie'
+            }`}
+            key={index}
+          />
+        ))}
       </div>
 
-      <header className="flex items-center justify-between gap-4 px-5 pt-4 pb-2">
-        <p className="m-0 text-ink-soft text-[.8rem] font-bold font-mono">
+      <header className="patch flex items-center justify-between gap-4 px-5 py-3">
+        <p className="m-0 font-bold">
           Step {stepIndex + 1} of {total}
         </p>
         <button
           ref={exitButtonRef}
           type="button"
-          className="grid size-9 place-items-center p-0 text-ink-soft bg-transparent border border-line rounded-full cursor-pointer transition-colors duration-150 hover:text-tomato hover:border-tomato focus-visible:outline-3 focus-visible:outline-cobalt focus-visible:outline-offset-4"
+          className="grid size-11 place-items-center p-0 text-ramie bg-ink border-0 cursor-pointer hover:bg-hong hover:text-paper-fixed"
           onClick={onExit}
           aria-label="Exit cooking mode"
         >
@@ -150,37 +154,41 @@ export function CookingMode({ recipe, completedSteps, onToggleStep, onExit }) {
         </button>
       </header>
 
-      <div className="grid content-center gap-6 px-6 py-4 overflow-y-auto">
-        <label className="flex items-start gap-3 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            className="mt-[7px] size-5 flex-none accent-tomato cursor-pointer"
-            checked={done}
-            onChange={() => onToggleStep(stepIndex)}
-            aria-label={`Mark step ${stepNumber} as done`}
-          />
-          <p
-            className={`m-0 text-[1.35rem] max-[480px]:text-[1.15rem] font-bold leading-[1.45] ${
-              done ? 'text-ink-soft line-through' : ''
-            }`}
-          >
-            {step.instruction}
-          </p>
-        </label>
+      <div className="patch grid md:grid-cols-2 items-center gap-x-10 gap-y-6 px-[clamp(20px,5vw,72px)] py-6 overflow-y-auto">
+        {/* Keyed so each step's illustration restarts its own motion. */}
+        <StepVisual instruction={step.instruction} key={stepIndex} />
 
-        {step.tip && (
-          <Callout tone="leaf" icon={<NoteIcon />}>
-            {step.tip}
-          </Callout>
-        )}
+        <div className="grid gap-5">
+          <span className="display text-hong text-[clamp(2.4rem,5vw,3.6rem)]" aria-hidden="true">
+            {stepNumber}
+          </span>
+          <label className="flex items-start gap-4 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="check mt-[7px]"
+              checked={done}
+              onChange={() => onToggleStep(stepIndex)}
+              aria-label={`Mark step ${stepNumber} as done`}
+            />
+            <p
+              className={`m-0 max-w-[36ch] text-[clamp(1.15rem,2vw,1.6rem)] font-medium leading-[1.4] ${
+                done ? 'text-ink-soft line-through' : ''
+              }`}
+            >
+              {step.instruction}
+            </p>
+          </label>
+
+          {step.tip && <p className="note m-0 max-w-[60ch] max-[480px]:flex-col max-[480px]:gap-1">{step.tip}</p>}
+        </div>
       </div>
 
-      <footer className="grid grid-cols-2 gap-3 px-5 pt-3 pb-[max(16px,env(safe-area-inset-bottom))] border-t border-line">
-        <Button className="w-full" onClick={() => goToDelta(-1)} disabled={stepIndex === 0}>
+      <footer className="grid grid-cols-2 gap-[3px] pb-[env(safe-area-inset-bottom)]">
+        <Button variant="paper" className="btn-lg w-full" onClick={() => goToDelta(-1)} disabled={stepIndex === 0}>
           <ArrowLeftIcon />
           Previous
         </Button>
-        <Button variant="primary" className="w-full" onClick={() => goToDelta(1)} disabled={stepIndex === total - 1}>
+        <Button variant="primary" className="btn-lg w-full" onClick={() => goToDelta(1)} disabled={stepIndex === total - 1}>
           Next
           <ArrowRightIcon />
         </Button>

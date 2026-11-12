@@ -20,7 +20,7 @@ export default function App() {
     setView('workflow')
     window.requestAnimationFrame(() => {
       document.querySelector('#workflow')?.focus({ preventScroll: true })
-      document.querySelector('#workflow')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     })
   }
 
@@ -30,14 +30,15 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-[100svh] pb-20 bg-paper">
+    <div className="min-h-[100svh] pb-24 bg-ground">
       <a
-        className="fixed top-2 left-2 z-20 px-3.5 py-2.5 text-white bg-ink-fixed -translate-y-[160%] transition-transform duration-150 focus:translate-y-0"
+        className="fixed top-2 left-2 z-20 px-3.5 py-2.5 text-paper-fixed bg-ink-fixed font-bold -translate-y-[160%] transition-transform duration-150 focus:translate-y-0"
         href={view === 'home' ? '#how-it-works' : '#workflow'}
       >
         Skip to content
       </a>
-      <div className="w-[min(100%-48px,1080px)] max-[760px]:w-[min(100%-28px,1080px)] mx-auto">
+      {/* The whole page is one cloth: every section below is pieced onto the last. */}
+      <div className="w-[min(100%-20px,1440px)] mx-auto">
         <Header view={view} onGoHome={goHome} onPrimaryAction={view === 'home' ? beginCooking : startOver} />
         <HomePage hidden={view !== 'home'} onStartCooking={beginCooking} />
         <WorkflowPage

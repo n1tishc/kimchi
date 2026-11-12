@@ -47,3 +47,10 @@ export const STEPS = [
     description: 'Choose a recipe and let the good smells begin.',
   },
 ]
+
+// The one law for ingredient types, used everywhere a type is shown.
+export const INGREDIENT_TYPE_MARKS = {
+  detected: 'var(--color-hong)',
+  pantry: 'var(--color-nok)',
+  extra: 'var(--color-hwang)',
+}

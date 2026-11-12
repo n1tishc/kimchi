@@ -9,7 +9,7 @@ export function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export const DEMO_IMAGE = '/demo-ingredients.png'
+export const DEMO_IMAGE = '/counter.webp'
 
 export const DEMO_ITEMS = ['chicken', 'peppers', 'potatoes', 'tomato']
 

@@ -1,6 +1,7 @@
 export function ErrorNote({ children }) {
   return (
-    <p className="m-0 px-3.5 py-3 text-danger bg-danger-wash border-l-4 border-danger text-[.9rem] leading-[1.5]">
+    <p className="patch tone-ink m-0 flex items-start gap-3 px-4 py-3.5 text-[.95rem] leading-[1.5]" role="alert">
+      <span className="flex-none mt-[5px] size-3 bg-hong" aria-hidden="true" />
       {children}
     </p>
   )

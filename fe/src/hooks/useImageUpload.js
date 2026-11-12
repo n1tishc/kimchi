@@ -1,36 +1,67 @@
 import { useEffect, useRef, useState } from 'react'
 
-export function useImageUpload({ demoMode, demoImage }) {
-  const [file, setFile] = useState(null)
-  const [preview, setPreview] = useState(demoMode ? demoImage : null)
-  const previewUrlRef = useRef(null)
+// Each photo is its own model call, so the batch is capped.
+export const MAX_PHOTOS = 6
 
-  useEffect(() => () => {
-    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current)
+// Holds the photos chosen for one scan. In demo mode the bundled sample photo
+// stands in until the user adds photos of their own.
+export function useImageUpload({ demoMode, demoImage }) {
+  const demoPhotos = demoMode ? [{ id: 'demo', url: demoImage, file: null }] : []
+  const [photos, setPhotos] = useState(demoPhotos)
+  const nextIdRef = useRef(0)
+  const urlsRef = useRef(new Set())
+
+  useEffect(() => {
+    const urls = urlsRef.current
+    return () => {
+      for (const url of urls) URL.revokeObjectURL(url)
+      urls.clear()
+    }
   }, [])
 
-  function revokePreview() {
-    if (previewUrlRef.current) {
-      URL.revokeObjectURL(previewUrlRef.current)
-      previewUrlRef.current = null
+  function release(url) {
+    if (urlsRef.current.delete(url)) URL.revokeObjectURL(url)
+  }
+
+  // Returns how many of the offered files were taken and why the rest were not,
+  // so the caller can tell the user.
+  function add(fileList) {
+    const offered = [...(fileList ?? [])]
+    const images = offered.filter((file) => file.type.startsWith('image/'))
+    const own = photos.filter((photo) => photo.file)
+    const accepted = images.slice(0, Math.max(MAX_PHOTOS - own.length, 0))
+
+    if (accepted.length > 0) {
+      const added = accepted.map((file) => {
+        const url = URL.createObjectURL(file)
+        urlsRef.current.add(url)
+        nextIdRef.current += 1
+        return { id: `photo-${nextIdRef.current}`, url, file }
+      })
+      setPhotos([...own, ...added])
+    }
+
+    return {
+      added: accepted.length,
+      notImages: offered.length - images.length,
+      overLimit: images.length - accepted.length,
     }
   }
 
-  function pick(nextFile) {
-    if (!nextFile) return
-
-    revokePreview()
-    const previewUrl = URL.createObjectURL(nextFile)
-    previewUrlRef.current = previewUrl
-    setFile(nextFile)
-    setPreview(previewUrl)
+  function remove(id) {
+    const target = photos.find((photo) => photo.id === id)
+    if (!target?.file) return
+    release(target.url)
+    const remaining = photos.filter((photo) => photo.id !== id)
+    setPhotos(remaining.length > 0 ? remaining : demoPhotos)
   }
 
   function reset() {
-    revokePreview()
-    setFile(null)
-    setPreview(demoMode ? demoImage : null)
+    for (const photo of photos) if (photo.file) release(photo.url)
+    setPhotos(demoPhotos)
   }
 
-  return { file, preview, pick, reset }
+  const files = photos.filter((photo) => photo.file).map((photo) => photo.file)
+
+  return { photos, files, add, remove, reset }
 }
